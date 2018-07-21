@@ -129,3 +129,17 @@ $api->version('v1', function ($api) {
         $api->get('get_country', 'CommonController@getCountry');
     });
 });
+
+
+/* 钱包 */
+$api->version('v1', function ($api) {
+    /** @var Dingo\Api\Routing\Router $api */
+    $api->group(['namespace' => 'App\Http\Controllers\Api\V1\Finance','prefix' => 'v1/finance'], function ($api) {
+        /** @var Dingo\Api\Routing\Router $api */
+        $api->group(['middleware'=>'apiauth'],function($api){
+            /** @var Dingo\Api\Routing\Router $api */
+            $api->get('finance_list', 'FinanceController@getFinanceList');//获取用户资产信息列表
+            $api->get('wallet_addr', 'FinanceController@getwalletAddr');//获取用户资产信息列表
+        });
+    });
+});
