@@ -12,6 +12,7 @@ use Dingo\Api\Http\Request;
 use App\Services\FinanceService;
 use App\Services\UserService;
 use App\Support\SaltTrait;
+use Illuminate\Support\Facades\Redis;
 
 class FinanceController extends BaseController
 {
@@ -118,6 +119,7 @@ class FinanceController extends BaseController
          ]);
 
          $finance_info=$this->financeService->getFinance($data['finance_id']);
+
          if(empty($finance_info['data'])){
              $code=$this->code_num('FinanceEmpty');
              return $this->errors($code,__LINE__);
@@ -135,6 +137,7 @@ class FinanceController extends BaseController
              $code=$this->code_num('Empty');
              return $this->errors($code,__LINE__);
          }
+
          $res['wallet_addr']=$info['data']['wallet_addr'];
          $res['qr_msg']=base64_encode($info['data']['wallet_addr']);
          return $this->response($res, 200);
@@ -207,7 +210,10 @@ class FinanceController extends BaseController
              'finance_id' => 'required|int|min:1',
              'destination_addr' => 'required|string',//目标地址
              'withdraw_amount' => 'required|string',
-             'password' =>'required'
+             'password' =>'required',
+             'phone_number' =>'phone_number',
+             'verification_code' => 'required',
+             'verification_key'  => 'required'
          ]);
          //钱包信息
          $finance_info=$this->financeService->getFinance($data['finance_id']);
@@ -225,6 +231,23 @@ class FinanceController extends BaseController
          if($pin_code !== true){
              return $this->errors($pin_code,__LINE__);
          }
+
+         //验证手机验证码
+         $redis_key = env('PC_PHONE') . $data['phone_number'] . "_" . $data['verification_key'];
+         //验证邮箱验证码是否过期
+         if (empty(redis::get($redis_key))) {
+             $code = $this->code_num('VerifyInvalid');
+             return $this->errors($code, __LINE__);
+         }
+
+         //验证手机验证码是否错误
+         if (!hash_equals(redis::get($redis_key), $data['verification_code'])) {
+             $code = $this->code_num('VerificationCode');
+             return $this->errors($code, __LINE__);
+         }
+
+         //清除redis 里面的数据
+         redis::del($redis_key);
 
          //组装数据
          $withdraw_data=[

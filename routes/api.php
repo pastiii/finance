@@ -140,7 +140,7 @@ $api->version('v1', function ($api) {
             /** @var Dingo\Api\Routing\Router $api */
             $api->get('user_info', 'FinanceController@getUserInfo');//获取用户资产信息列表
             $api->get('finance_list', 'FinanceController@getFinanceList');//获取用户资产信息列表
-            $api->get('finance_wallet', 'FinanceController@getFinanceWallet');//获取用户钱包信息
+            $api->get('finance_wallet', 'FinanceController@getFinanceWallet');//获取用户钱包地址信息
             $api->get('finance_history_list', 'FinanceController@getFinanceHistoryList');//获取用户资产信息历史列表
             $api->get('finance_history', 'FinanceController@getFinanceHistory');//获取用户资产信息历史
 

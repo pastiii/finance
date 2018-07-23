@@ -90,7 +90,7 @@ class FinanceService
     public function createFinanceWallet($data)
     {
         $url = "finance/finance_wallet";
-        return $this->send_request($url, 'get',$data,$this->financeService);
+        return $this->send_request($url, 'post',$data,$this->financeService);
     }
 
     /**
