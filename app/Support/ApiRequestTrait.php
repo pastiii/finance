@@ -25,7 +25,7 @@ trait ApiRequestTrait
     protected  function send_request($url, $request_type, $resources=[],$url_suffix)
     {
         $client = new Client(['base_uri' => $url_suffix]);
-        $data = ['code' => 0, 'data' => ['message' => 'error','real_code'=>500]];
+        $data = ['code' => 0, 'data' => [],'message' => 'error','real_code'=>500];
         try {
             /* 接受请求类型 */
             $request_type = empty($request_type) ? 'GET' :strtoupper($request_type);
