@@ -20,6 +20,16 @@ class FinanceService
          $this->financeService= env('FINANCE_BASE_URL');
      }
 
+    /**
+     * 获取用户资产信息
+     * @param $id int
+     * @return array
+     */
+    public function getFinance($id)
+    {
+        $url = "finance/finance/id/".$id;
+        return $this->send_request($url, 'get',[],$this->financeService);
+    }
      /**
      * 获取用户资产信息列表
      * @param $data array
@@ -66,11 +76,22 @@ class FinanceService
      * @param $data array
      * @return array
      */
-     public function getwalletAddr($data)
+     public function getFinanceWallet($data)
      {
          $url = "finance/finance_wallet/id/".$data['finance_wallet_id'];
          return $this->send_request($url, 'get',[],$this->financeService);
      }
+
+    /**
+     * 创建用户资产钱包
+     * @param $data array
+     * @return array
+     */
+    public function createFinanceWallet($data)
+    {
+        $url = "finance/finance_wallet";
+        return $this->send_request($url, 'get',$data,$this->financeService);
+    }
 
     /**
      * 获取用户资产信息历史列表
@@ -122,6 +143,13 @@ class FinanceService
     {
         $url = "finance/finance_history/id/".$id;
         return $this->send_request($url, 'get',[],$this->financeService);
+    }
+
+
+    public function createFinanceWithdraw($data)
+    {
+        $url = "finance/finance_withdraw";
+        return $this->send_request($url, 'post',$data,$this->financeService);
     }
 
 

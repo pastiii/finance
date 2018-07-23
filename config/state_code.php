@@ -54,5 +54,8 @@ return [
     'NetworkAnomaly'       => 6019, //网络异常
     'UserNameError'        => 6020, //用户名错误
     'SafeValidate'         => 6021, //请先进行安全验证
+
+    'FinanceEmpty'         => 7001, //钱包信息为空
+    'FinanceAvailable'     => 7002, //提现余额不足
 ];
 
