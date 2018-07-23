@@ -139,10 +139,12 @@ $api->version('v1', function ($api) {
         $api->group(['middleware'=>'apiauth'],function($api){
             /** @var Dingo\Api\Routing\Router $api */
             $api->get('user_info', 'FinanceController@getUserInfo');//获取用户资产信息列表
+            $api->get('get_finance', 'FinanceController@getFinance');//获取用户资产信息
             $api->get('finance_list', 'FinanceController@getFinanceList');//获取用户资产信息列表
             $api->get('finance_wallet', 'FinanceController@getFinanceWallet');//获取用户钱包地址信息
             $api->get('finance_history_list', 'FinanceController@getFinanceHistoryList');//获取用户资产信息历史列表
             $api->get('finance_history', 'FinanceController@getFinanceHistory');//获取用户资产信息历史
+            $api->post('create_finance_withdraw', 'FinanceController@createFinanceWithdraw');//提交提现申请
 
             /* OTC钱包 */
             $api->get('otc_finance_list', 'OtcController@getOtcFinanceList');//获取用户OTC资产信息列表

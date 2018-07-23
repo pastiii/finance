@@ -155,7 +155,7 @@ class FinanceController extends BaseController
          $data=$this->validate($request, [
              'limit'   => 'required|int|min:1',
              'page'    => 'required|int|min:1',
-             'coin_id' => 'nullable|int|min:1',
+             'coin_id' => 'required|int|min:1',
              'begin'   => 'nullable|int',
              'end'     => 'nullable|int'
          ]);
@@ -197,6 +197,28 @@ class FinanceController extends BaseController
          
      }
 
+    /**
+     * 获取用户资产信息
+     * @param Request $request
+     * @return array
+     */
+     public function getFinance(Request $request)
+     {
+         $data=$this->validate($request, [
+             'finance_id' => 'required|int|min:1',
+         ]);
+
+         //钱包信息
+         $finance_info=$this->financeService->getFinance($data['finance_id']);
+         if(empty($finance_info['data'])){
+             $code=$this->code_num('FinanceEmpty');
+             return $this->errors($code,__LINE__);
+         }
+         //手机号
+         $phone = $this->userService->getUserPhone($this->user_id);
+         $finance_info['data']['phone_number']=empty($phone['data']) ? "" : $phone['data']['phone_number'];
+         return $this->response($finance_info['data'], 200);
+     }
      /**
      * 提交提现申请
      * @param Request $request
