@@ -13,6 +13,8 @@ use App\Services\FinanceService;
 
 class FinanceController extends BaseController
 {
+     /* @var FinanceService  $financeService*/
+
      protected $financeService;
 
      public function __construct()
@@ -20,9 +22,8 @@ class FinanceController extends BaseController
          parent::__construct();
      }
 
-     /**
-     * 获取 financeService
-     * @return FinanceService|\Illuminate\Foundation\Application|mixed
+    /**
+     * @return \Illuminate\Foundation\Application|mixed
      */
      protected function getFinanceService()
      {
@@ -63,11 +64,12 @@ class FinanceController extends BaseController
      * @param Request $request
      * @return array
      */
-     public function getwalletAddr(Request $request){
+     public function getwalletAddr(Request $request)
+     {
          $this->getFinanceService();
 
          $data=$this->validate($request, [
-             'finance_wallet_id' => 'nullable|int|min:1'
+             'finance_wallet_id' => 'required|int|min:1'
          ]);
 
          $addr=$this->financeService->getwalletAddr($data);
@@ -77,7 +79,61 @@ class FinanceController extends BaseController
              return $this->errors($code,__LINE__);
          }
 
-         return $this->response($addr['data'], 200);;
+         return $this->response($addr['data'], 200);
+     }
+
+     /**
+     * 获取用户资产信息历史列表
+     * @param Request $request
+     * @return array
+     */
+     public function getFinanceHistoryList(Request $request)
+     {
+         $this->getFinanceService();
+
+         $data=$this->validate($request, [
+             'limit'   => 'required|int|min:1',
+             'page'    => 'required|int|min:1',
+             'coin_id' => 'nullable|int|min:1',
+             'begin'   => 'nullable|int',
+             'end'     => 'nullable|int'
+         ]);
+         $data['user_id']=$this->user_id;
+
+         //获取用户资产信息历史列表
+         $list= $this->financeService->getFinanceHistoryList($data);
+
+         if($list['code'] != 200){
+             $code=$this->code_num('GetMsgFail');
+             return $this->errors($code,__LINE__);
+         }
+
+         return $this->response($list['data'], 200);;
+
+     }
+
+    /**
+     * 获取用户资产信息历史
+     * @param Request $request
+     * @return array
+     */
+     public function getFinanceHistory(Request $request)
+     {
+         $this->getFinanceService();
+
+         $data=$this->validate($request, [
+             'finance_history_id' => 'required|int|min:1'
+         ]);
+
+         $info=$this->financeService->getFinanceHistory($data['finance_history_id']);
+
+         if(empty($info['data'])){
+             $code=$this->code_num('Empty');
+             return $this->errors($code,__LINE__);
+         }
+
+         return $this->response($info['data'], 200);
+         
      }
 
 
