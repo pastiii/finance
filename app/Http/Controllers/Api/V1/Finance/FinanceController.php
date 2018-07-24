@@ -223,10 +223,11 @@ class FinanceController extends BaseController
      */
      public function getFinance(Request $request)
      {
+         $this->getFinanceService();
+
          $data=$this->validate($request, [
              'finance_id' => 'required|int|min:1',
          ]);
-
          //钱包信息
          $finance_info=$this->financeService->getFinance($data['finance_id']);
          if(empty($finance_info['data'])){
