@@ -224,7 +224,7 @@ class FinanceController extends BaseController
      public function getFinance(Request $request)
      {
          $this->getFinanceService();
-
+         $this->getUserService();
          $data=$this->validate($request, [
              'finance_id' => 'required|int|min:1',
          ]);
