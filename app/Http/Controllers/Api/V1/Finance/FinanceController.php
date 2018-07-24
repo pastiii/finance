@@ -132,7 +132,7 @@ class FinanceController extends BaseController
      public function getFinanceWallet(Request $request)
      {
          $this->getFinanceService();
-
+         $user=$this->get_user_info();
          $data=$this->validate($request, [
              'finance_id' => 'required|int|min:1'
          ]);
@@ -145,7 +145,7 @@ class FinanceController extends BaseController
          }
          $param= [
              "user_id"  =>$this->user_id,
-             "user_name"=>$finance_info['data']['user_name'],
+             "user_name"=>$user['user_name'],
              "coin_id"  =>$finance_info['data']['coin_id'],
              "coin_name"=>$finance_info['data']['coin_name'],
              "coin_type"=>$finance_info['data']['coin_type']
