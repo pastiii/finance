@@ -97,7 +97,7 @@ class FinanceController extends BaseController
          $data['user_id']=$this->user_id;
          //获取用户资产信息列表
          $list= $this->financeService->getFinanceList($data);
-
+         return $list;
          if($list['code'] != 200){
              $code=$this->code_num('GetMsgFail');
              return $this->errors($code,__LINE__);
@@ -337,5 +337,10 @@ class FinanceController extends BaseController
         return true;
     }
 
+    /**
+     * 划转
+     * @param Request $request
+     * @return array
+     */
 
 }
