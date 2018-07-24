@@ -25,7 +25,7 @@ class FinanceController extends BaseController
      public function __construct()
      {
          parent::__construct();
-         $this->user_id=1;
+         //$this->user_id=19;
      }
 
     /**
@@ -103,7 +103,25 @@ class FinanceController extends BaseController
              return $this->errors($code,__LINE__);
          }
 
-         return $this->response($list['data'], 200);
+         $info=[];
+         if(!empty($list['data']['list'])){
+             foreach ($list['data']['list'] as $value){
+                 $temp=[
+                     'finance_id' => $value['finance_id'],
+                     'coin_id'    => $value['coin_id'],
+                     'coin_name'  => $value['coin_name'],
+                     'coin_type'  => $value['coin_type'],
+                     'finance_available' =>$value['finance_available_str'],
+                     'finance_amount' =>$value['finance_amount_str'],
+                     'finance_amount_rmb' => '0.00'
+                 ];
+                 array_push($info,$temp);
+             }
+         }
+         $res['list']= $info;
+         $res['page']=$list['data']['page'];
+
+         return $this->response($res, 200);
      }
 
      /**
