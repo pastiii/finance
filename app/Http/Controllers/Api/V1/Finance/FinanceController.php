@@ -113,7 +113,7 @@ class FinanceController extends BaseController
                      'coin_type'  => $value['coin_type'],
                      'finance_available' =>$value['finance_available_str'],
                      'finance_amount' =>$value['finance_amount_str'],
-                     'finance_amount_rmb' => '0.00'
+                     'finance_amount_rmb' => '0.0'
                  ];
                  array_push($info,$temp);
              }
@@ -274,6 +274,7 @@ class FinanceController extends BaseController
              return $this->errors($pin_code,__LINE__);
          }
 
+
          //验证手机验证码
          $redis_key = env('PC_PHONE') . $data['phone_number'] . "_" . $data['verification_key'];
          //验证邮箱验证码是否过期
@@ -339,9 +340,53 @@ class FinanceController extends BaseController
     }
 
     /**
+     * 币种列表
+     * @param Request $request
+     * @return array
+     */
+    public function getCoinList(Request $request)
+    {
+        $this->getFinanceService();
+        $data=$this->validate($request,[
+            'finance_id' => 'nullable|int'
+        ]);
+        $finance_id=isset($data['finance_id'])?$data['finance_id']:0;
+        $info=$this->financeService->getCoinList($data);
+
+        if($info['code'] != 200){
+            $code=$this->code_num('GetMsgFail');
+            return $this->errors($code,__LINE__);
+        }
+        $list=[];
+        if(!empty($info['data']['list'])){
+            foreach ($info['data']['list'] as $value){
+                $checked= $finance_id == $value['finance_id'] ? 1 : 0;
+                $temp=[
+                   'finance_id' => $value['finance_id'],
+                   'coin_id'    => $value['coin_id'],
+                   'coin_name'  => $value['coin_name'],
+                   'checked'    => $checked
+                ];
+                array_push($list,$temp);
+            }
+        }
+        return $this->response($list, 200);
+    }
+
+
+     /**
      * 划转
      * @param Request $request
      * @return array
      */
+    public function financeShift(Request $request)
+    {
+        //划出账户
+
+        //转入账户
+
+    }
+
+
 
 }

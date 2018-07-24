@@ -37,7 +37,7 @@ class OtcService
         $page_info['total_page'] =  ceil($count['data']['count']/$data['limit']);//每页显示数量
 
         $data['start']=($data['page']-1)*$data['limit'];
-        $url = "finance/finance?".http_build_query($data);
+        $url = "otc/otc_finance?".http_build_query($data);
         $list = $this->send_request($url, 'get',[],$this->otcService);
 
         if($list['code'] == 200){
@@ -56,7 +56,7 @@ class OtcService
     {
         unset($data['limit']);
         unset($data['page']);
-        $url = "finance/finance/count?".http_build_query($data);
+        $url = "otc/otc_finance/count?".http_build_query($data);
         return $this->send_request($url, 'get',[],$this->otcService);
     }
     
@@ -78,7 +78,7 @@ class OtcService
         $page_info['total_page'] =  ceil($count['data']['count']/$data['limit']);//每页显示数量
 
         $data['start']=($data['page']-1)*$data['limit'];
-        $url = "finance/finance_history?".http_build_query($data);
+        $url = "otc/otc_finance_history?".http_build_query($data);
         $list = $this->send_request($url, 'get',[],$this->otcService);
 
         if($list['code'] == 200){
@@ -97,7 +97,7 @@ class OtcService
     {
         unset($data['limit']);
         unset($data['page']);
-        $url = "finance/finance_history/count?".http_build_query($data);
+        $url = "otc/otc_finance_history/count?".http_build_query($data);
         return $this->send_request($url, 'get',[],$this->otcService);
     }
 
@@ -108,7 +108,7 @@ class OtcService
      */
     public function getOtcFinanceHistory($id)
     {
-        $url = "finance/finance_history/id/".$id;
+        $url = "otc/otc_finance_history/id/".$id;
         return $this->send_request($url, 'get',[],$this->otcService);
     }
 

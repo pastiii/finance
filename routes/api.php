@@ -145,7 +145,9 @@ $api->version('v1', function ($api) {
             $api->get('finance_history_list', 'FinanceController@getFinanceHistoryList');//获取用户资产信息历史列表
             $api->get('finance_history', 'FinanceController@getFinanceHistory');//获取用户资产信息历史
             $api->post('create_finance_withdraw', 'FinanceController@createFinanceWithdraw');//提交提现申请
-
+            $api->get('finance_shift', 'FinanceController@financeShift');//划转
+            $api->post('create_finance_shift','FinanceController@financeShift');//提交划转
+            $api->get('get_coin_list','FinanceController@getCoinList');//币种列表
             /* OTC钱包 */
             $api->get('otc_finance_list', 'OtcController@getOtcFinanceList');//获取用户OTC资产信息列表
             $api->get('otc_finance_history_list', 'OtcController@getOtcFinanceHistoryList');//获取用户OTC资产信息历史列表

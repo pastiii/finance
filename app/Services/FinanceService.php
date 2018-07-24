@@ -145,11 +145,26 @@ class FinanceService
         return $this->send_request($url, 'get',[],$this->financeService);
     }
 
-
+    /**
+     * 创建提现记录
+     * @param $data array
+     * @return array
+     */
     public function createFinanceWithdraw($data)
     {
         $url = "finance/finance_withdraw";
         return $this->send_request($url, 'post',$data,$this->financeService);
+    }
+
+    /**
+     * 获取币种列表
+     * @param $data array
+     * @return array
+     */
+    public function getCoinList($data)
+    {
+        $url = "finance/finance?".http_build_query($data);
+        return $this->send_request($url, 'get',[],$this->financeService);
     }
 
 
