@@ -55,18 +55,19 @@ class OtcController extends BaseController
             $code=$this->code_num('GetMsgFail');
             return $this->errors($code,__LINE__);
         }
-
+        //数据重组
         $info=[];
         if(!empty($list['data']['list'])){
             foreach ($list['data']['list'] as $value){
                 $temp=[
-                    'otc_finance_id' => $value['otc_finance_id'],
-                    'coin_id'    => $value['coin_id'],
-                    'coin_name'  => $value['coin_name'],
-                    'coin_type'  => $value['coin_type'],
-                    'finance_available' =>$value['finance_available_str'],
-                    'finance_amount' =>$value['finance_amount_str'],
-                    'finance_amount_rmb' => '0.0'
+                    'otc_finance_id'      => $value['otc_finance_id'],
+                    'coin_id'             => $value['coin_id'],
+                    'coin_name'           => $value['coin_name'],
+                    'coin_type'           => $value['coin_type'],
+                    'finance_available'   => $value['finance_available_str'],
+                    'finance_amount'      => $value['finance_amount_str'],
+                    'finance_amount_rmb'  => '0.0',
+                    'frozen_capital'      => '0.0'
                 ];
                 array_push($info,$temp);
             }
