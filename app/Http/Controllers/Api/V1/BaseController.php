@@ -10,9 +10,9 @@ class BaseController extends Controller
 
     public function __construct()
     {
-        $info = ['user_name'=>'tom','user_id'=>1,'type'=>'user','email'=>'1728288771@qq.com'];
-        $this->type = 1; // 1:pc 2:Mobile
-        $this->token = Apiauth::login($info,$this->type);
+        //$info = ['user_name'=>'tom','user_id'=>1,'type'=>'user','email'=>'1728288771@qq.com'];
+        //$this->type = 1; // 1:pc 2:Mobile
+        //$this->token = Apiauth::login($info,$this->type);
         $this->user_id = intval(ApiAuth::userId());
     }
 
