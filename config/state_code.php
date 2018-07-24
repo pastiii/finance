@@ -57,5 +57,6 @@ return [
 
     'FinanceEmpty'         => 7001, //钱包信息为空
     'FinanceAvailable'     => 7002, //提现余额不足
+    'InfoEmpty'            => 7003, //数据为空
 ];
 

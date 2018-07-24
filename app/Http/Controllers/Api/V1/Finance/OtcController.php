@@ -124,7 +124,7 @@ class OtcController extends BaseController
         $info=$this->otcService->getOtcFinanceHistory($data['finance_history_id']);
 
         if(empty($info['data'])){
-            $code=$this->code_num('Empty');
+            $code=$this->code_num('InfoEmpty');
             return $this->errors($code,__LINE__);
         }
 

@@ -153,7 +153,7 @@ class FinanceController extends BaseController
          $info=$this->financeService->createFinanceWallet($param);
 
          if(empty($info['data'])){
-             $code=$this->code_num('Empty');
+             $code=$this->code_num('InfoEmpty');
              return $this->errors($code,__LINE__);
          }
 
@@ -208,7 +208,7 @@ class FinanceController extends BaseController
          $info=$this->financeService->getFinanceHistory($data['finance_history_id']);
 
          if(empty($info['data'])){
-             $code=$this->code_num('Empty');
+             $code=$this->code_num('InfoEmpty');
              return $this->errors($code,__LINE__);
          }
 
