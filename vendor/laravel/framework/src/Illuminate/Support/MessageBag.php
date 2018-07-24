@@ -266,15 +266,35 @@ class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, Me
      */
     public function messages()
     {
-       $message = [];
-       foreach ($this->messages as $key =>$val) {
-           if (is_array($val)) {
-               foreach ($val as $v){
-                   $message[$key] = intval($v);
-               }
-           }
-       }
-       return $message;
+        $message = [];
+        foreach ($this->messages as $key =>$val) {
+            if (is_array($val)) {
+
+                $first = current($val);
+                $current = array_map(function ($item) {
+                    $arr = [];
+                    if ($item) {
+                        $value = explode(',', $item);
+                        if ($value) {
+                            foreach ($value as $v) {
+                                $i = explode(':', $v);
+                                if (count($i) == 2) {
+                                    $arr[trim($i[0])] = $i[1];
+                                }
+                            }
+                        }
+                    }
+                    return $arr;
+                }, $first);
+
+                $message[key($first)] = [$key => json_encode(current($current))];
+                break;
+//               foreach ($val as $v){
+//                   $message[$key] = $v;
+//               }
+            }
+        }
+        return $message;
     }
 
     /**
