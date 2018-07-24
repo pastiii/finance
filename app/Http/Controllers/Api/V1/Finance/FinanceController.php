@@ -25,6 +25,7 @@ class FinanceController extends BaseController
      public function __construct()
      {
          parent::__construct();
+         $this->user_id=1;
      }
 
     /**
