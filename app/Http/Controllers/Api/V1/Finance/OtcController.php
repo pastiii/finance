@@ -132,23 +132,54 @@ class OtcController extends BaseController
     public function getOtcFinanceHistoryList(Request $request)
     {
         $data=$this->validate($request, [
-            'limit'   => 'required|int|min:1',
-            'page'    => 'required|int|min:1',
-            'coin_id' => 'nullable|int|min:1',
-            'begin'   => 'nullable|int',
-            'end'     => 'nullable|int'
+            'limit'   => 'nullable|int|min:1',
+            'page'    => 'nullable|int|min:1',
+            'otc_finance_id' => 'required|int|min:1',
         ]);
+        if(!isset($data['limit'])) $data['limit']=10;
+        if(!isset($data['page'])) $data['page']=1;
         $data['user_id']=$this->user_id;
 
         //获取用户OTC资产信息历史列表
         $list= $this->otcService->getOtcFinanceHistoryList($data);
 
+
         if($list['code'] != 200){
             $code=$this->code_num('GetMsgFail');
             return $this->errors($code,__LINE__);
         }
+        //重组数据
+        $info=[];
+        if(!empty($list['data']['list'])){
+            foreach ($list['data']['list'] as $value){
+                for($i=0;$i<2;$i++){
+                    $temp=[
+                        'finance_history_id'   => $value['finance_history_id'],
+                        'created_at'           => date('Y-m-d H:s',$value['created_at']),
+                        'coin_name'            => $value['coin_name'],
+                        'amount'               => $value['amount'],
+                        'finance_history_type' => $value['finance_history_type'],
+                        'status'               => $value['status'],
+                    ];
+                    array_push($info,$temp);
+                }
+            }
+        }
+        for($i=1;$i<3;$i++){
+            $temp=[
+                'finance_history_id'   => $i,
+                'created_at'           => date('Y-m-d H:s',time()),
+                'coin_name'            => 'ETH',
+                'amount'               => 100,
+                'finance_history_type' => $i,
+                'status'               => $i,
+            ];
+            array_push($info,$temp);
+        }
+        $res['list']= $info;
+        $res['page']=$list['data']['page'];
 
-        return $this->response($list['data'], 200);;
+        return $this->response($res, 200);;
 
     }
 

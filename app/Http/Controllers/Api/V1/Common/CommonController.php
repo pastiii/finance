@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\V1\BaseController;
 use App\Services\SecurityVerificationService;
 use App\Services\MessageTemplateService;
 use Illuminate\Http\Request;
+use App\Services\UserService;
+use Illuminate\Support\Facades\Redis;
 
 /**
  * Created by PhpStorm.
@@ -17,7 +19,8 @@ class CommonController extends BaseController
 {
     /* @var SecurityVerificationService */
     protected $securityVerificationService;
-
+    /* @var UserService  $userService*/
+    protected $userService;
     /**
      * @return SecurityVerificationService|\Illuminate\Foundation\Application|mixed
      */
@@ -27,6 +30,15 @@ class CommonController extends BaseController
             $this->securityVerificationService = app(SecurityVerificationService::class);
         }
         return $this->securityVerificationService;
+    }
+
+    protected  function getUserService()
+    {
+        if (!isset($this->userService)) {
+            $this->userService = app(UserService::class);
+        }
+        return $this->userService;
+
     }
 
     /**
@@ -147,5 +159,39 @@ class CommonController extends BaseController
 
         $code = $this->code_num('GetMsgFail');
         return $this->errors($code, __LINE__);
+    }
+
+    /**
+     * 检查二次验证状态
+     * @return mixed|string
+     */
+    protected function checkTwoStatus()
+    {
+        $info = '';
+        $this->getUserService();
+        //开启,禁用二次验证判断
+        $redis_key = env('PC_STATUS') . "user_" . $this->user_id;
+        if (empty(Redis::get($redis_key))) {
+            $user_status = $this->userService->getUserStatus($this->user_id);
+            if (!empty($user_status['data'])) {
+                $info = $this->userService->bindingInfo($user_status, $this->user_id);
+            }
+        }
+        return $info;
+    }
+
+    /**
+     * 检查二次验证状态
+     * @return mixed|string
+     */
+    public function checkTwo()
+    {
+        //开启,禁用二次验证判断
+        if (!empty($this->checkTwoStatus())) {
+            $code = $this->code_num('TwoVerification');
+            return $this->response($this->checkTwoStatus(), $code);
+        }
+
+        return $this->response("", 200);
     }
 }

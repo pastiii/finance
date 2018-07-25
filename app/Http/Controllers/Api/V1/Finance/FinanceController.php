@@ -7,14 +7,14 @@
  */
 namespace App\Http\Controllers\Api\V1\Finance;
 
-use App\Http\Controllers\Api\V1\BaseController;
+use App\Http\Controllers\api\V1\Common\CommonController;
 use Dingo\Api\Http\Request;
 use App\Services\FinanceService;
 use App\Services\UserService;
 use App\Support\SaltTrait;
 use Illuminate\Support\Facades\Redis;
 
-class FinanceController extends BaseController
+class FinanceController extends CommonController
 {
      use SaltTrait;
      /* @var FinanceService  $financeService*/
@@ -104,7 +104,7 @@ class FinanceController extends BaseController
          //重组数据
          $info=[];
          if(!empty($list['data']['list'])){
-             foreach ($list['data']['list'] as $value){
+             foreach ($list['data']['list'] as $k=>$value){
                  $temp=[
                      'finance_id' => $value['finance_id'],
                      'coin_id'    => $value['coin_id'],
@@ -173,9 +173,7 @@ class FinanceController extends BaseController
          $data=$this->validate($request, [
              'limit'   => 'required|int|min:1',
              'page'    => 'required|int|min:1',
-             'coin_id' => 'required|int|min:1',
-             'begin'   => 'nullable|int',
-             'end'     => 'nullable|int'
+             'finance_id' => 'required|int|min:1'
          ]);
          $data['user_id']=$this->user_id;
 
@@ -186,6 +184,36 @@ class FinanceController extends BaseController
              $code=$this->code_num('GetMsgFail');
              return $this->errors($code,__LINE__);
          }
+
+         //重组数据
+         $info=[];
+         if(!empty($list['data']['list'])){
+             foreach ($list['data']['list'] as $value){
+                 $temp=[
+                     'finance_history_id'   => $value['finance_history_id'],
+                     'created_at'           => date('Y-m-d H:s',$value['created_at']),
+                     'coin_name'            => $value['coin_name'],
+                     'amount'               => $value['amount'],
+                     'finance_history_type' => $value['finance_history_type'],
+                     'status'               => $value['status'],
+                 ];
+                 array_push($info,$temp);
+             }
+         }
+
+         for($i=1;$i<3;$i++){
+             $temp=[
+                 'finance_history_id'   => $i,
+                 'created_at'           => date('Y-m-d H:s',time()),
+                 'coin_name'            => 'ETH',
+                 'amount'               => 100,
+                 'finance_history_type' => $i,
+                 'status'               => $i,
+             ];
+             array_push($info,$temp);
+         }
+         $res['list']= $info;
+         $res['page']=$list['data']['page'];
 
          return $this->response($list['data'], 200);;
 
@@ -230,10 +258,20 @@ class FinanceController extends BaseController
              $code=$this->code_num('FinanceEmpty');
              return $this->errors($code,__LINE__);
          }
-         //手机号
-         $phone = $this->userService->getUserPhone($this->user_id);
-         $finance_info['data']['phone_number']=empty($phone['data']) ? "" : $phone['data']['phone_number'];
-         return $this->response($finance_info['data'], 200);
+
+         $ping_data = $this->userService->getUserPin($this->get_user_info());
+
+         $ping_status = 1;
+         if(empty($ping_data['data'])){
+             $ping_status = 0;
+         }
+         return $this->checkTwo();
+         $res['finance_available']=$finance_info['data']['finance_available'];
+         $res['finance_rate']=0.10;//手续费率
+         $res['finance_upper']=10000;//单次提额上限
+         $res['ping_status']=$ping_status;
+
+         return $this->response($res, 200);
      }
      /**
      * 提交提现申请
@@ -258,10 +296,10 @@ class FinanceController extends BaseController
              return $this->errors($code,__LINE__);
          }
          //判断余额
-         if($data['withdraw_amount'] > $finance_info['data']['finance_available']){
+         /*if($data['withdraw_amount'] > $finance_info['data']['finance_available']){
              $code=$this->code_num('FinanceAvailable');
              return $this->errors($code,__LINE__);
-         }
+         }*/
          //检查password
          $pin_code=$this->checkPin($data['password']);
          if($pin_code !== true){
@@ -375,7 +413,7 @@ class FinanceController extends BaseController
     public function financeShift(Request $request)
     {
         //划出账户
-
+        $account=[];
         //转入账户
 
     }
