@@ -110,6 +110,7 @@ class FinanceController extends BaseController
                      'coin_id'    => $value['coin_id'],
                      'coin_name'  => $value['coin_name'],
                      'coin_type'  => $value['coin_type'],
+                     'coin_image' => '',
                      'finance_available' =>$value['finance_available_str'],
                      'finance_amount' =>$value['finance_amount_str'],
                      'finance_amount_rmb' => '0.0'
@@ -298,7 +299,7 @@ class FinanceController extends BaseController
              'finance_withdraw_amount_str' =>$data['withdraw_amount'],
              'finance_withdraw_status' =>1
          ];
-         //创建
+         //创建提现记录
          $res=$this->financeService->createFinanceWithdraw($withdraw_data);
 
          if($res['code'] != 200){

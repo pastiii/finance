@@ -63,6 +63,7 @@ class ExchangeController extends BaseController
                     'coin_id'             => $value['coin_id'],
                     'coin_name'           => $value['coin_name'],
                     'coin_type'           => $value['coin_type'],
+                    'coin_image'          => '',
                     'finance_available'   => $value['finance_available_str'],
                     'finance_amount'      => $value['finance_amount_str'],
                     'finance_amount_rmb'  => '0.0',
