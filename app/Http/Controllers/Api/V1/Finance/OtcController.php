@@ -37,7 +37,9 @@ class OtcController extends BaseController
         return $this->otcService;
     }
 
-    /* @var UserService  $userService*/
+    /**
+     * @return \Illuminate\Foundation\Application|mixed
+     */
     protected  function getUserService()
     {
         if (!isset($this->userService)) {
