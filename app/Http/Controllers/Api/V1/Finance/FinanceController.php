@@ -8,14 +8,14 @@
 namespace App\Http\Controllers\Api\V1\Finance;
 
 use App\Http\Controllers\Api\V1\BaseController;
-use App\Http\Controllers\api\V1\Common\CommonController;
+use App\Http\Controllers\Api\V1\Common\CommonController;
 use Dingo\Api\Http\Request;
 use App\Services\FinanceService;
 use App\Services\UserService;
 use App\Support\SaltTrait;
 use Illuminate\Support\Facades\Redis;
 
-class FinanceController extends BaseController
+class FinanceController extends CommonController
 {
      use SaltTrait;
      /* @var FinanceService  $financeService*/
@@ -266,7 +266,6 @@ class FinanceController extends BaseController
          if(empty($ping_data['data'])){
              $ping_status = 0;
          }
-         return $this->checkTwo();
          $res['finance_available']=$finance_info['data']['finance_available'];
          $res['finance_rate']=0.10;//手续费率
          $res['finance_upper']=10000;//单次提额上限
