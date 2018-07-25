@@ -10,17 +10,20 @@ namespace App\Http\Controllers\Api\V1\Finance;
 use App\Http\Controllers\Api\V1\BaseController;
 use Dingo\Api\Http\Request;
 use App\Services\OtcService;
+use App\Services\UserService;
 
 class OtcController extends BaseController
 {
     /* @var OtcService  $otcService*/
 
     protected $otcService;
+    protected $userService;
 
     public function __construct()
     {
         parent::__construct();
         $this->getOtcService();
+        $this->getUserService();
     }
 
     /**
@@ -32,6 +35,47 @@ class OtcController extends BaseController
             $this->otcService = app(OtcService::class);
         }
         return $this->otcService;
+    }
+
+    /* @var UserService  $userService*/
+    protected  function getUserService()
+    {
+        if (!isset($this->userService)) {
+            $this->userService = app(UserService::class);
+        }
+        return $this->userService;
+
+    }
+    /**
+     * 获取用户基本信息
+     * @return array
+     */
+    public function getUserInfo()
+    {
+        //获取用户创建时间
+        $user=$this->get_user_info();
+
+        $user_info = $this->userService->getUser($this->user_id);
+        if ($user_info['code'] != 200) {
+            $code  = $this->code_num('GetUserFail');
+            return $this->errors($code, __LINE__);
+        }
+        //获取用户最后一次登录历史
+        $page       = 1;
+        $pageSize   = 1;
+        $last_login = $this->userService->getUserLoginHistoryList($this->user_id, $pageSize, $page);
+        //账号信息获取
+        $email = $this->userService->getUserEmailById($this->user_id);
+        $phone = $this->userService->getUserPhone($this->user_id);
+        //数据处理
+        $data['email']            = empty($email['data']) ? "" : $email['data']['email'];
+        $data['phone']            = empty($phone['data']) ? "" : $phone['data']['phone_number'];
+        $data['name']             = $user['user_name'];
+        $data['last_login_time']  = isset($last_login['data']['list']) ? date('Y-m-d H:i:s', $last_login['data']['list'][0]['created_at']) : '';
+        $data['finance_usdt']= 0;
+        $data['finance_rmb']=0;
+        $data['finance_us']=0;
+        return $this->response($data, 200);
     }
 
     /**
