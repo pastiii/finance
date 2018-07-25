@@ -96,7 +96,7 @@ class UserService{
     public function bindingInfo($info, $id)
     {
         $data = [];
-        if ($info['data']['second_phone_status'] == 1) {
+        if ($info['data']['second_phone_status'] == 0) {
             //获取用户手机信息
             $phone_info    = $this->getUserPhone($id);
             $data['phone'] = 'phone';

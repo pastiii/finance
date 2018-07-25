@@ -7,7 +7,6 @@
  */
 namespace App\Http\Controllers\Api\V1\Finance;
 
-use App\Http\Controllers\Api\V1\BaseController;
 use App\Http\Controllers\Api\V1\Common\CommonController;
 use Dingo\Api\Http\Request;
 use App\Services\FinanceService;
@@ -250,6 +249,7 @@ class FinanceController extends CommonController
      public function getFinance(Request $request)
      {
 
+         return $this->checkTwo();
          $data=$this->validate($request, [
              'finance_id' => 'required|int|min:1',
          ]);
@@ -285,9 +285,9 @@ class FinanceController extends CommonController
              'destination_addr' => 'required|string',//目标地址
              'withdraw_amount' => 'required|string',
              'password' =>'required',
-             'phone_number' =>'phone_number',
-             'verification_code' => 'required',
-             'verification_key'  => 'required'
+             'cation_type' => 'required',
+             'cation_code' => 'nullable|string',
+             'cation_key'  => 'nullable|string'
          ]);
          //钱包信息
          $finance_info=$this->financeService->getFinance($data['finance_id']);
@@ -306,7 +306,7 @@ class FinanceController extends CommonController
              return $this->errors($pin_code,__LINE__);
          }
 
-
+/*
          //验证手机验证码
          $redis_key = env('PC_PHONE') . $data['phone_number'] . "_" . $data['verification_key'];
          //验证邮箱验证码是否过期
@@ -322,7 +322,7 @@ class FinanceController extends CommonController
          }
 
          //清除redis 里面的数据
-         redis::del($redis_key);
+         redis::del($redis_key);*/
 
          //组装数据
          $withdraw_data=[
