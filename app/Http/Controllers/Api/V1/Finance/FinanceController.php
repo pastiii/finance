@@ -25,7 +25,8 @@ class FinanceController extends BaseController
      public function __construct()
      {
          parent::__construct();
-         //$this->user_id=19;
+         $this->getFinanceService();
+         $this->getUserService();
      }
 
     /**
@@ -55,7 +56,6 @@ class FinanceController extends BaseController
     public function getUserInfo()
     {
         //获取用户创建时间
-        $this->getUserService();
         $user=$this->get_user_info();
 
         $user_info = $this->userService->getUser($this->user_id);
@@ -71,8 +71,8 @@ class FinanceController extends BaseController
         $email = $this->userService->getUserEmailById($this->user_id);
         $phone = $this->userService->getUserPhone($this->user_id);
         //数据处理
-        $data['email']            = empty($email['data']) ? "" : substr($email['data']['email'], '0', 3)."*****".strstr($email['data']['email'], "@",false);
-        $data['phone']            = empty($phone['data']) ? "" : substr($phone['data']['phone_number'] , 0 , 3)."******".substr($phone['data']['phone_number'], -2,2);
+        $data['email']            = empty($email['data']) ? "" : $email['data']['email'];
+        $data['phone']            = empty($phone['data']) ? "" : $phone['data']['phone_number'];
         $data['name']             = $user['user_name'];
         $data['last_login_time']  = isset($last_login['data']['list']) ? date('Y-m-d H:i:s', $last_login['data']['list'][0]['created_at']) : '';
         $data['finance_usdt']= 0;
@@ -88,7 +88,6 @@ class FinanceController extends BaseController
      */
      public function getFinanceList(Request $request)
      {
-         $this->getFinanceService();
          $data=$this->validate($request, [
              'limit'   => 'required|int|min:1',
              'page'    => 'required|int|min:1',
@@ -102,7 +101,7 @@ class FinanceController extends BaseController
              $code=$this->code_num('GetMsgFail');
              return $this->errors($code,__LINE__);
          }
-
+         //重组数据
          $info=[];
          if(!empty($list['data']['list'])){
              foreach ($list['data']['list'] as $value){
@@ -131,18 +130,18 @@ class FinanceController extends BaseController
      */
      public function getFinanceWallet(Request $request)
      {
-         $this->getFinanceService();
          $user=$this->get_user_info();
          $data=$this->validate($request, [
              'finance_id' => 'required|int|min:1'
          ]);
-
+         //获取资产信息
          $finance_info=$this->financeService->getFinance($data['finance_id']);
 
          if(empty($finance_info['data'])){
              $code=$this->code_num('FinanceEmpty');
              return $this->errors($code,__LINE__);
          }
+
          $param= [
              "user_id"  =>$this->user_id,
              "user_name"=>$user['user_name'],
@@ -150,6 +149,7 @@ class FinanceController extends BaseController
              "coin_name"=>$finance_info['data']['coin_name'],
              "coin_type"=>$finance_info['data']['coin_type']
          ];
+         //获取地址信息
          $info=$this->financeService->createFinanceWallet($param);
 
          if(empty($info['data'])){
@@ -169,8 +169,6 @@ class FinanceController extends BaseController
      */
      public function getFinanceHistoryList(Request $request)
      {
-         $this->getFinanceService();
-
          $data=$this->validate($request, [
              'limit'   => 'required|int|min:1',
              'page'    => 'required|int|min:1',
@@ -199,8 +197,6 @@ class FinanceController extends BaseController
      */
      public function getFinanceHistory(Request $request)
      {
-         $this->getFinanceService();
-
          $data=$this->validate($request, [
              'finance_history_id' => 'required|int|min:1'
          ]);
@@ -223,8 +219,7 @@ class FinanceController extends BaseController
      */
      public function getFinance(Request $request)
      {
-         $this->getFinanceService();
-         $this->getUserService();
+
          $data=$this->validate($request, [
              'finance_id' => 'required|int|min:1',
          ]);
@@ -246,8 +241,6 @@ class FinanceController extends BaseController
      */
      public function createFinanceWithdraw(Request $request)
      {
-         $this->getFinanceService();
-
          $data=$this->validate($request, [
              'finance_id' => 'required|int|min:1',
              'destination_addr' => 'required|string',//目标地址
@@ -322,7 +315,7 @@ class FinanceController extends BaseController
      * @return int
      */
     public function checkPin($pin){
-        $this->getUserService();
+
         $ping_data = $this->userService->getUserPin($this->get_user_info());
 
         if($ping_data['code'] !=200 || empty($ping_data['data'])){
@@ -346,7 +339,6 @@ class FinanceController extends BaseController
      */
     public function getCoinList(Request $request)
     {
-        $this->getFinanceService();
         $data=$this->validate($request,[
             'finance_id' => 'nullable|int'
         ]);

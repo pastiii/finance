@@ -9,37 +9,37 @@ namespace App\Http\Controllers\Api\V1\Finance;
 
 use App\Http\Controllers\Api\V1\BaseController;
 use Dingo\Api\Http\Request;
-use App\Services\OtcService;
+use App\Services\ExchangeService;
 
-class OtcController extends BaseController
+class ExchangeController extends BaseController
 {
-    /* @var OtcService  $otcService*/
+    /* @var ExchangeService  $exchangeService*/
 
-    protected $otcService;
+    protected $exchangeService;
 
     public function __construct()
     {
         parent::__construct();
-        $this->getOtcService();
+        $this->getExchangeService();
     }
 
     /**
      * @return \Illuminate\Foundation\Application|mixed
      */
-    protected function getOtcService()
+    protected function getExchangeService()
     {
-        if (!isset($this->otcService)) {
-            $this->otcService = app(OtcService::class);
+        if (!isset($this->exchangeService)) {
+            $this->exchangeService = app(ExchangeService::class);
         }
-        return $this->otcService;
+        return $this->exchangeService;
     }
 
     /**
-     * 获取用户OTC资产信息列表
+     * 获取用户币币交易资产信息列表
      * @param Request $request
      * @return array
      */
-    public function getOtcFinanceList(Request $request)
+    public function getExchangeFinanceList(Request $request)
     {
         $data=$this->validate($request, [
             'limit'   => 'required|int|min:1',
@@ -47,8 +47,8 @@ class OtcController extends BaseController
             'coin_id' => 'nullable|int|min:1'
         ]);
         $data['user_id']=$this->user_id;
-        //获取用户OTC资产信息列表
-        $list= $this->otcService->getOtcFinanceList($data);
+        //获取用户币币交易资产信息列表
+        $list= $this->exchangeService->getExchangeFinanceList($data);
 
         if($list['code'] != 200){
             $code=$this->code_num('GetMsgFail');
@@ -59,7 +59,7 @@ class OtcController extends BaseController
         if(!empty($list['data']['list'])){
             foreach ($list['data']['list'] as $value){
                 $temp=[
-                    'otc_finance_id'      => $value['otc_finance_id'],
+                    'exchange_finance_id'      => $value['exchange_finance_id'],
                     'coin_id'             => $value['coin_id'],
                     'coin_name'           => $value['coin_name'],
                     'coin_type'           => $value['coin_type'],
@@ -76,13 +76,13 @@ class OtcController extends BaseController
 
         return $this->response($res, 200);
     }
-    
+
     /**
-     * 获取用户OTC资产信息历史列表
+     * 获取用户币币交易资产信息历史列表
      * @param Request $request
      * @return array
      */
-    public function getOtcFinanceHistoryList(Request $request)
+    public function getExchangeFinanceHistoryList(Request $request)
     {
         $data=$this->validate($request, [
             'limit'   => 'required|int|min:1',
@@ -93,8 +93,8 @@ class OtcController extends BaseController
         ]);
         $data['user_id']=$this->user_id;
 
-        //获取用户OTC资产信息历史列表
-        $list= $this->otcService->getOtcFinanceHistoryList($data);
+        //获取用户币币交易资产信息历史列表
+        $list= $this->exchangeService->getExchangeFinanceHistoryList($data);
 
         if($list['code'] != 200){
             $code=$this->code_num('GetMsgFail');
@@ -106,17 +106,17 @@ class OtcController extends BaseController
     }
 
     /**
-     * 获取用户OTC资产信息历史
+     * 获取用户币币交易资产信息历史
      * @param Request $request
      * @return array
      */
-    public function getOtcFinanceHistory(Request $request)
+    public function getExchangeFinanceHistory(Request $request)
     {
         $data=$this->validate($request, [
             'finance_history_id' => 'required|int|min:1'
         ]);
 
-        $info=$this->otcService->getOtcFinanceHistory($data['finance_history_id']);
+        $info=$this->exchangeService->getExchangeFinanceHistory($data['finance_history_id']);
 
         if(empty($info['data'])){
             $code=$this->code_num('InfoEmpty');
