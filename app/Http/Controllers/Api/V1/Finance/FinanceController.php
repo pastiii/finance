@@ -249,7 +249,7 @@ class FinanceController extends CommonController
      public function getFinance(Request $request)
      {
 
-         return $this->checkTwo();
+         //return $this->checkTwo();
          $data=$this->validate($request, [
              'finance_id' => 'required|int|min:1',
          ]);
@@ -266,11 +266,12 @@ class FinanceController extends CommonController
          if(empty($ping_data['data'])){
              $ping_status = 0;
          }
+
          $res['finance_available']=$finance_info['data']['finance_available'];
          $res['finance_rate']=0.10;//手续费率
          $res['finance_upper']=10000;//单次提额上限
          $res['ping_status']=$ping_status;
-
+         $res['check_two']= $this->checkTwoStatus();
          return $this->response($res, 200);
      }
      /**
