@@ -7,6 +7,7 @@
  */
 namespace App\Http\Controllers\Api\V1\Finance;
 
+use App\Http\Controllers\Api\V1\BaseController;
 use App\Http\Controllers\api\V1\Common\CommonController;
 use Dingo\Api\Http\Request;
 use App\Services\FinanceService;
@@ -14,7 +15,7 @@ use App\Services\UserService;
 use App\Support\SaltTrait;
 use Illuminate\Support\Facades\Redis;
 
-class FinanceController extends CommonController
+class FinanceController extends BaseController
 {
      use SaltTrait;
      /* @var FinanceService  $financeService*/
@@ -201,14 +202,14 @@ class FinanceController extends CommonController
              }
          }
 
-         for($i=1;$i<3;$i++){
+         for($i=1;$i<5;$i++){
              $temp=[
                  'finance_history_id'   => $i,
                  'created_at'           => date('Y-m-d H:s',time()),
                  'coin_name'            => 'ETH',
                  'amount'               => 100,
                  'finance_history_type' => $i,
-                 'status'               => $i,
+                 'status'               => 1,
              ];
              array_push($info,$temp);
          }
