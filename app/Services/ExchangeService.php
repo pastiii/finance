@@ -20,14 +20,15 @@ class ExchangeService
     }
 
     /**
-     * 获取用户OTC资产信息列表
+     * 获取用户币币资产信息列表
      * @param $data array
      * @return array
      */
     public function getExchangeFinanceList($data)
     {
-        //获取用户OTC资产信息列表数量
+        //获取用户币币资产信息列表数量
         $count=$this->getExchangeFinanceCount($data); //数量
+
         if($count['code'] != 200){
             return $count;
         }
@@ -40,15 +41,15 @@ class ExchangeService
         $url = "exchange/exchange_finance?".http_build_query($data);
         $list = $this->send_request($url, 'get',[],$this->exchangeService);
 
-        if($list['code'] == 200){
+       /* if($list['code'] == 200){
             $list['data']['page']=$page_info;
-        }
-
+        }*/
+        $list['data']['page']=$page_info;
         return $list;
     }
 
     /**
-     * 获取用户OTC资产信息列表数量
+     * 获取用户币币资产信息列表数量
      * @param $data array
      * @return array
      */
@@ -61,14 +62,15 @@ class ExchangeService
     }
     
     /**
-     * 获取用户OTC资产信息历史列表
+     * 获取用户币币资产信息历史列表
      * @param $data array
      * @return array
      */
     public function getExchangeFinanceHistoryList($data)
     {
-        //获取用户OTC资产信息历史列表数量
+        //获取用户币币资产信息历史列表数量
         $count=$this->getExchangeFinanceHistoryCount($data); //数量
+
         if($count['code'] != 200){
             return $count;
         }
@@ -89,7 +91,7 @@ class ExchangeService
     }
 
     /**
-     * 获取用户OTC资产信息历史列表数量
+     * 获取用户币币资产信息历史列表数量
      * @param $data array
      * @return array
      */
@@ -102,7 +104,7 @@ class ExchangeService
     }
 
     /**
-     * 获取用户OTC资产信息历史
+     * 获取用户币币资产信息历史
      * @param $id int
      * @return array
      */

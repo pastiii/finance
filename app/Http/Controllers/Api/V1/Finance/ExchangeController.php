@@ -88,18 +88,20 @@ class ExchangeController extends CommonController
     public function getExchangeFinanceList(Request $request)
     {
         $data=$this->validate($request, [
-            'limit'   => 'required|int|min:1',
-            'page'    => 'required|int|min:1',
+            'limit'   => 'nullable|int|min:1',
+            'page'    => 'nullable|int|min:1',
             'coin_name' => 'nullable|int|min:1'
         ]);
+        if(!isset($data['limit'])) $data['limit']=10;
+        if(!isset($data['page'])) $data['page']=1;
         $data['user_id']=$this->user_id;
         //获取用户币币交易资产信息列表
         $list= $this->exchangeService->getExchangeFinanceList($data);
-
+/*
         if($list['code'] != 200){
             $code=$this->code_num('GetMsgFail');
             return $this->errors($code,__LINE__);
-        }
+        }*/
         //数据重组
         $info=[];
         if(!empty($list['data']['list'])){
@@ -118,6 +120,21 @@ class ExchangeController extends CommonController
                 array_push($info,$temp);
             }
         }
+        for($i=1;$i<5;$i++){
+            $temp=[
+                'exchange_finance_id'      => $i,
+                'coin_id'             => $i,
+                'coin_name'           => 'ETH',
+                'coin_type'           => 1,
+                'coin_image'          => '',
+                'finance_available'   => $i*10,
+                'finance_amount'      => $i*10,
+                'finance_amount_rmb'  => '0.0',
+                'frozen_capital'      => '10.0'
+            ];
+            array_push($info,$temp);
+        }
+
         $res['list']= $info;
         $res['page']=$list['data']['page'];
 
@@ -132,21 +149,52 @@ class ExchangeController extends CommonController
     public function getExchangeFinanceHistoryList(Request $request)
     {
         $data=$this->validate($request, [
-            'limit'   => 'required|int|min:1',
-            'page'    => 'required|int|min:1',
+            'limit'   => 'nullable|int|min:1',
+            'page'    => 'nullable|int|min:1',
             'finance_id' => 'nullable|int|min:1',
         ]);
+        if(!isset($data['limit'])) $data['limit']=10;
+        if(!isset($data['page'])) $data['page']=1;
         $data['user_id']=$this->user_id;
 
         //获取用户币币交易资产信息历史列表
         $list= $this->exchangeService->getExchangeFinanceHistoryList($data);
-
-        if($list['code'] != 200){
+        return $list;
+        /*if($list['code'] != 200){
             $code=$this->code_num('GetMsgFail');
             return $this->errors($code,__LINE__);
+        }*/
+        //重组数据
+        $info=[];
+        /*if(!empty($list['data']['list'])){
+            foreach ($list['data']['list'] as $value){
+                for($i=0;$i<2;$i++){
+                    $temp=[
+                        'finance_history_id'   => $value['finance_history_id'],
+                        'created_at'           => date('Y-m-d H:s',$value['created_at']),
+                        'coin_name'            => $value['coin_name'],
+                        'amount'               => $value['amount'],
+                        'finance_history_type' => $value['finance_history_type'],
+                        'status'               => $value['status'],
+                    ];
+                    array_push($info,$temp);
+                }
+            }
+        }*/
+        for($i=1;$i<3;$i++){
+            $temp=[
+                'finance_history_id'   => $i,
+                'created_at'           => date('Y-m-d H:s',time()),
+                'coin_name'            => 'ETH',
+                'amount'               => 100,
+                'finance_history_type' => $i,
+                'status'               => $i,
+            ];
+            array_push($info,$temp);
         }
-
-        return $this->response($list['data'], 200);;
+        $res['list']= $info;
+        $res['page']=$list['data']['page'];
+        return $this->response($res, 200);;
 
     }
 
