@@ -13,6 +13,7 @@ use App\Services\FinanceService;
 use App\Services\UserService;
 use App\Support\SaltTrait;
 use Illuminate\Support\Facades\Redis;
+use App\Services\SecurityVerificationService;
 
 class FinanceController extends CommonController
 {
@@ -274,7 +275,7 @@ class FinanceController extends CommonController
          }
          $res['finance_available']=1000; //$finance_info['data']['finance_available'];
          $res['coin_status']  = 2;//$coin_info['data']['coin_status'];
-         $res['finance_rate'] = 100;//$coin_info['data']['withdraw_fees'];//手续费
+         $res['finance_rate'] = 10;//$coin_info['data']['withdraw_fees'];//手续费
          $res['finance_upper']= 1000;//$coin_info['data']['withdrawone_max'];//单次提额上限
          $res['ping_status']  = $ping_status;
          $res['check_two']    = $this->checkTwoStatus();
@@ -332,12 +333,16 @@ class FinanceController extends CommonController
 
          //二次验证
          if(isset($data['cation_type'])){
-             if($data['cation_type'] != 'google'){
-                 $cation_data=$this->validate($request,[
-                     'cation_code' => 'required',
-                     'cation_key' => 'required'
-                 ]);
-             }
+            if($data['cation_type'] != 'google'){
+                $cation_data=$this->validate($request,[
+                    'cation_code' => 'required',
+                    'cation_key' => 'required'
+                ]);
+            }else{
+                $cation_data=$this->validate($request,[
+                    'cation_code' => 'required'
+                ]);
+            }
             switch ($data['cation_type']){
                 case 'phone':
                     $phone_code = $this->validatePhoneCode($cation_data);
@@ -352,7 +357,10 @@ class FinanceController extends CommonController
                     }
                     break;
                 case 'google':
-
+                    $google_code = $this->checkGoogleCode($cation_data);
+                    if($google_code !== true){
+                        return $this->errors($google_code,__LINE__);
+                    }
                     break;
             }
          }else{
@@ -471,7 +479,63 @@ class FinanceController extends CommonController
           return true;
     }
 
+    /**
+     * 验证google验证码
+     * @param $param array
+     * @return array
+     */
+    public function checkGoogleCode($param)
+    {
+        /* 验证验证码 */
+        $data['verify']=$param['cation_code'];
+        /* 获取用户信息 */
+        $user_info = $this->get_user_info();
+        /*  获取登陆用户的googleKey  */
+        $googleAuthenticator = $this->userService->getUserGoogleAuth($user_info['user_id']);
 
+        /* 不否存在secret */
+        if (!isset($data['secret'])) {
+            /* 判断用户是否绑定 */
+            if ($googleAuthenticator['code'] != 200) {
+                $code = $this->code_num('Unbound');
+                return $code;
+            }
+            /* 重新赋值 */
+            $data['secret'] = $googleAuthenticator['data']['google_key'];
+        }
+        /* @var  SecurityVerificationService $securityVerification*/
+        $securityVerification = app(SecurityVerificationService::class);
+        /* 验证googleVerify */
+        $result = $securityVerification->checkGoogleVerify($data);
+        /* 数据返回 */
+        if ($result['data']['code'] != 200) {
+            $code = $this->code_num('VerificationCode');
+            return $code;
+        }
+
+        /* 验证成功没有绑定google key 则绑定 */
+        if ($googleAuthenticator['real_code'] != 200) {
+            $response = $this->bindingGoogleKey($user_info, $data['secret']);
+            /* 判断是否绑定成功 */
+            if (!$response) {
+                $code = $this->code_num('BindingFail');
+                return $code;
+            }
+        }
+
+        if (!empty($googleAuthenticator['data']) && !empty($data['secret']))
+        {
+            //绑定过就修改
+            $response = $this->editGoogleKey($data['secret']);
+            /* 判断是否绑定成功 */
+            if (!$response) {
+                $code = $this->code_num('BindingFail');
+                return $code;
+            }
+        }
+
+        return true;
+    }
 
     /**
      * 币种列表

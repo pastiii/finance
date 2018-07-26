@@ -7,20 +7,23 @@
  */
 namespace App\Http\Controllers\Api\V1\Finance;
 
-use App\Http\Controllers\Api\V1\BaseController;
+use App\Http\Controllers\Api\V1\Common\CommonController;
 use Dingo\Api\Http\Request;
 use App\Services\ExchangeService;
+use App\Services\UserService;
 
-class ExchangeController extends BaseController
+class ExchangeController extends CommonController
 {
     /* @var ExchangeService  $exchangeService*/
 
     protected $exchangeService;
+    protected $userService;
 
     public function __construct()
     {
         parent::__construct();
         $this->getExchangeService();
+        $this->getUserService();
     }
 
     /**
@@ -33,6 +36,49 @@ class ExchangeController extends BaseController
         }
         return $this->exchangeService;
     }
+    /**
+     * @return \Illuminate\Foundation\Application|mixed
+     */
+    protected  function getUserService()
+    {
+        if (!isset($this->userService)) {
+            $this->userService = app(UserService::class);
+        }
+        return $this->userService;
+
+    }
+
+    /**
+     * 获取用户基本信息
+     * @return array
+     */
+    public function getUserInfo()
+    {
+        //获取用户创建时间
+        $user=$this->get_user_info();
+
+        $user_info = $this->userService->getUser($this->user_id);
+        if ($user_info['code'] != 200) {
+            $code  = $this->code_num('GetUserFail');
+            return $this->errors($code, __LINE__);
+        }
+        //获取用户最后一次登录历史
+        $page       = 1;
+        $pageSize   = 1;
+        $last_login = $this->userService->getUserLoginHistoryList($this->user_id, $pageSize, $page);
+        //账号信息获取
+        $email = $this->userService->getUserEmailById($this->user_id);
+        $phone = $this->userService->getUserPhone($this->user_id);
+        //数据处理
+        $data['email']            = empty($email['data']) ? "" : $email['data']['email'];
+        $data['phone']            = empty($phone['data']) ? "" : $phone['data']['phone_number'];
+        $data['name']             = $user['user_name'];
+        $data['last_login_time']  = isset($last_login['data']['list']) ? date('Y-m-d H:i:s', $last_login['data']['list'][0]['created_at']) : '';
+        $data['finance_usdt']= 0;
+        $data['finance_rmb']=0;
+        $data['finance_us']=0;
+        return $this->response($data, 200);
+    }
 
     /**
      * 获取用户币币交易资产信息列表
@@ -44,7 +90,7 @@ class ExchangeController extends BaseController
         $data=$this->validate($request, [
             'limit'   => 'required|int|min:1',
             'page'    => 'required|int|min:1',
-            'coin_id' => 'nullable|int|min:1'
+            'coin_name' => 'nullable|int|min:1'
         ]);
         $data['user_id']=$this->user_id;
         //获取用户币币交易资产信息列表
@@ -88,9 +134,7 @@ class ExchangeController extends BaseController
         $data=$this->validate($request, [
             'limit'   => 'required|int|min:1',
             'page'    => 'required|int|min:1',
-            'coin_id' => 'nullable|int|min:1',
-            'begin'   => 'nullable|int',
-            'end'     => 'nullable|int'
+            'finance_id' => 'nullable|int|min:1',
         ]);
         $data['user_id']=$this->user_id;
 

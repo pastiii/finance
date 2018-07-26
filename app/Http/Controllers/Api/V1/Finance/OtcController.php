@@ -7,13 +7,12 @@
  */
 namespace App\Http\Controllers\Api\V1\Finance;
 
-use App\Http\Controllers\Api\V1\BaseController;
 use App\Http\Controllers\Api\V1\Common\CommonController;
 use Dingo\Api\Http\Request;
 use App\Services\OtcService;
 use App\Services\UserService;
 
-class OtcController extends BaseController
+class OtcController extends CommonController
 {
     /* @var OtcService  $otcService*/
 

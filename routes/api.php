@@ -153,6 +153,11 @@ $api->version('v1', function ($api) {
             $api->get('otc_finance_list', 'OtcController@getOtcFinanceList');//获取用户OTC资产信息列表
             $api->get('otc_finance_history_list', 'OtcController@getOtcFinanceHistoryList');//获取用户OTC资产信息历史列表
             $api->get('otc_finance_history', 'OtcController@getOtcFinanceHistory');//获取用户OTC资产信息历史
+            /*币币交易*/
+            $api->get('exchange_user_info', 'ExchangeController@getUserInfo');//获取用户资产信息列表
+            $api->get('exchange_finance_list', 'ExchangeController@getExchangeFinanceList');//获取用户OTC资产信息列表
+            $api->get('exchange_finance_history_list', 'ExchangeController@getExchangeFinanceHistoryList');//获取用户OTC资产信息历史列表
+            $api->get('exchange_finance_history', 'ExchangeController@getExchangeFinanceHistory');//获取用户OTC资产信息历史
         });
     });
 });
