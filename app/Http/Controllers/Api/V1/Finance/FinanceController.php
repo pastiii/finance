@@ -171,12 +171,13 @@ class FinanceController extends CommonController
      public function getFinanceHistoryList(Request $request)
      {
          $data=$this->validate($request, [
-             'limit'   => 'required|int|min:1',
-             'page'    => 'required|int|min:1',
+             'limit'   => 'nullable|int|min:1',
+             'page'    => 'nullable|int|min:1',
              'finance_id' => 'required|int|min:1'
          ]);
          $data['user_id']=$this->user_id;
-
+         if(!isset($data['limit']))  $data['limit']=10;
+         if(!isset($data['page']))  $data['page']=1;
          //获取用户资产信息历史列表
          $list= $this->financeService->getFinanceHistoryList($data);
 
@@ -199,8 +200,8 @@ class FinanceController extends CommonController
                  ];
                  array_push($info,$temp);
              }
-         }
 
+         }
          for($i=1;$i<5;$i++){
              $temp=[
                  'finance_history_id'   => $i,
@@ -215,7 +216,7 @@ class FinanceController extends CommonController
          $res['list']= $info;
          $res['page']=$list['data']['page'];
 
-         return $this->response($list['data'], 200);;
+         return $this->response($res, 200);;
 
      }
 
@@ -249,7 +250,6 @@ class FinanceController extends CommonController
      public function getFinance(Request $request)
      {
 
-         //return $this->checkTwo();
          $data=$this->validate($request, [
              'finance_id' => 'required|int|min:1',
          ]);
@@ -259,6 +259,12 @@ class FinanceController extends CommonController
              $code=$this->code_num('FinanceEmpty');
              return $this->errors($code,__LINE__);
          }
+         //获取币种信息
+         /*$coin_info =$this->financeService->getCoin($finance_info['data']['coin_id']);
+         if(empty($coin_info['data'])){
+             $code = $this->code_num('NetworkAnomaly');
+             return $this->errors($code,__LINE__);
+         }*/
 
          $ping_data = $this->userService->getUserPin($this->get_user_info());
 
@@ -266,12 +272,12 @@ class FinanceController extends CommonController
          if(empty($ping_data['data'])){
              $ping_status = 0;
          }
-
          $res['finance_available']=$finance_info['data']['finance_available'];
-         $res['finance_rate']=0.10;//手续费率
-         $res['finance_upper']=10000;//单次提额上限
-         $res['ping_status']=$ping_status;
-         $res['check_two']= $this->checkTwoStatus();
+         $res['coin_status']  = 1;//$coin_info['data']['coin_status'];
+         $res['finance_rate'] = 15;//$coin_info['withdraw_fees'];//手续费率
+         $res['finance_upper']= 10000;//$coin_info['withdraw_one_max'];//单次提额上限
+         $res['ping_status']  = $ping_status;
+         $res['check_two']    = $this->checkTwoStatus();
          return $this->response($res, 200);
      }
      /**
@@ -286,7 +292,7 @@ class FinanceController extends CommonController
              'destination_addr' => 'required|string',//目标地址
              'withdraw_amount' => 'required|string',
              'password' =>'required',
-             'cation_type' => 'required',
+             'cation_type' => 'nullable|in:phone,email,google',
              'cation_code' => 'nullable|string',
              'cation_key'  => 'nullable|string'
          ]);
@@ -296,34 +302,62 @@ class FinanceController extends CommonController
              $code=$this->code_num('FinanceEmpty');
              return $this->errors($code,__LINE__);
          }
+        /* //获取币种信息
+         $coin_info =$this->financeService->getCoin($finance_info['data']['coin_id']);
+         if(empty($coin_info['data'])){
+             $code = $this->code_num('NetworkAnomaly');
+             return $this->errors($code,__LINE__);
+         }
+
+         if($coin_info['data']['coin_status'] != 2){
+             $code = $this->code_num('CoinStatus');
+             return $this->errors($code,__LINE__);
+         }*/
+
          //判断余额
          /*if($data['withdraw_amount'] > $finance_info['data']['finance_available']){
              $code=$this->code_num('FinanceAvailable');
              return $this->errors($code,__LINE__);
          }*/
          //检查password
-         $pin_code=$this->checkPin($data['password']);
+         /*$pin_code=$this->checkPin($data['password']);
          if($pin_code !== true){
              return $this->errors($pin_code,__LINE__);
-         }
+         }*/
+         //二次验证
+         if(isset($data['cation_type'])){
+             $cation_data=[
+                 'cation_code' => $data['cation_code'],
+                 'cation_key'  => $data['cation_key']
+             ];
+            switch ($data['cation_type']){
+                case 'phone':
+                    $this->validate($cation_data,[
+                        'cation_code' => '',
+                        'cation_key'  => ''
+                    ]);
+                    $phone_code = $this->validatePhoneCode($cation_data);
+                    if($phone_code !== true){
+                        return $this->errors($phone_code,__LINE__);
+                    }
+                    break;
+                case 'email':
+                    $email_code = $this->validateEmailCode($cation_data);
+                    if($email_code !== true){
+                        return $this->errors($email_code,__LINE__);
+                    }
+                    break;
+                case 'google':
 
-/*
-         //验证手机验证码
-         $redis_key = env('PC_PHONE') . $data['phone_number'] . "_" . $data['verification_key'];
-         //验证邮箱验证码是否过期
-         if (empty(redis::get($redis_key))) {
-             $code = $this->code_num('VerifyInvalid');
-             return $this->errors($code, __LINE__);
+                    break;
+            }
+         }else{
+             //开启,禁用二次验证判断
+             if (!empty($this->checkTwoStatus())) {
+                 $code = $this->code_num('TwoVerification');
+                 return $this->response($this->checkTwoStatus(), $code);
+             }
          }
-
-         //验证手机验证码是否错误
-         if (!hash_equals(redis::get($redis_key), $data['verification_code'])) {
-             $code = $this->code_num('VerificationCode');
-             return $this->errors($code, __LINE__);
-         }
-
-         //清除redis 里面的数据
-         redis::del($redis_key);*/
 
          //组装数据
          $withdraw_data=[
@@ -371,6 +405,69 @@ class FinanceController extends CommonController
         }
         return true;
     }
+
+    /**
+     * 验证邮箱验证码
+     * @param $data array
+     * @return array
+     */
+    public function validateEmailCode($data)
+    {
+        //获取邮箱地址
+        $email_info = $this->userService->getEmailById($this->user_id);
+        if (empty($email_info['data'])) {
+            $code = $this->code_num('NetworkAnomaly');
+            return $code;
+        }
+        $redis_key = env('PC_EMAIL') . $email_info['data']['email'] . "_" . $data['cation_key'];
+
+        //验证邮箱验证码是否过期
+        if (empty(redis::get($redis_key))) {
+            $code = $this->code_num('VerifyInvalid');
+            return $code;
+        }
+        //验证邮箱验证码是否错误
+        if (!hash_equals(redis::get($redis_key), $data['cation_code'])) {
+            $code = $this->code_num('VerificationCode');
+            return $code;
+        }
+        //清除redis 里面的数据
+        redis::del($redis_key);
+
+        return true;
+    }
+    /**
+     * 验证手机验证码
+     * @param $data array
+     * @return array
+     */
+    public function validatePhoneCode($data)
+    {
+        //获取用户手机
+        $phone_info = $this->userService->getUserPhone($this->user_id);
+        if (empty($phone_info['data']['phone_number'])) {
+            $code = $this->code_num('NetworkAnomaly');
+            return $code;
+        }
+          //验证手机验证码
+          $redis_key = env('PC_PHONE') . $phone_info['data']['phone_number'] . "_" . $data['cation_key'];
+          //验证邮箱验证码是否过期
+          if (empty(redis::get($redis_key))) {
+              $code = $this->code_num('VerifyInvalid');
+              return $code;
+          }
+          //验证手机验证码是否错误
+          if (!hash_equals(redis::get($redis_key), $data['cation_code'])) {
+              $code = $this->code_num('VerificationCode');
+              return $code;
+          }
+          //清除redis 里面的数据
+          redis::del($redis_key);
+
+          return true;
+    }
+
+
 
     /**
      * 币种列表
