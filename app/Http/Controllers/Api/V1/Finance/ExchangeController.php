@@ -159,7 +159,7 @@ class ExchangeController extends CommonController
 
         //获取用户币币交易资产信息历史列表
         $list= $this->exchangeService->getExchangeFinanceHistoryList($data);
-        return $list;
+
         /*if($list['code'] != 200){
             $code=$this->code_num('GetMsgFail');
             return $this->errors($code,__LINE__);
