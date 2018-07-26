@@ -116,4 +116,14 @@ class UserService{
         return $data;
     }
 
+    /**
+     * 通过用户id获取email账号
+     * @param $id
+     * @return array
+     */
+    public function getEmailById($id)
+    {
+        $url = "userauth/user_email/id/" . $id;
+        return $this->send_request($url, 'get','',$this->authBaseUrl);
+    }
 }
