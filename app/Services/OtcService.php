@@ -20,6 +20,17 @@ class OtcService
     }
 
     /**
+     * 获取用户资产信息
+     * @param $data array
+     * @return array
+     */
+    public function getOtcFinance($data)
+    {
+        $url = "otc/otc_finance?".http_build_query($data);
+        return $this->send_request($url, 'get',[],$this->otcService);
+    }
+
+    /**
      * 获取用户OTC资产信息列表
      * @param $data array
      * @return array

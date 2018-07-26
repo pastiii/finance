@@ -8,6 +8,8 @@
 namespace App\Http\Controllers\Api\V1\Finance;
 
 use App\Http\Controllers\Api\V1\Common\CommonController;
+use App\Services\OtcService;
+use App\Services\ExchangeService;
 use Dingo\Api\Http\Request;
 use App\Services\FinanceService;
 use App\Services\UserService;
@@ -545,18 +547,28 @@ class FinanceController extends CommonController
     public function getCoinList(Request $request)
     {
         $data=$this->validate($request,[
-            'finance_id' => 'nullable|int'
+            'finance_id' => 'required|int|min:1',
         ]);
-        $finance_id=isset($data['finance_id'])?$data['finance_id']:0;
+        $finance_id=$data['finance_id'];
+        //当前钱包币种资产信息
+        $finance_info=$this->financeService->getFinance($data['finance_id']);
+        if(empty($finance_info['data'])){
+            $code=$this->code_num('FinanceEmpty');
+            return $this->errors($code,__LINE__);
+        }
+        //获取当前钱包币种列表
         $info=$this->financeService->getCoinList($data);
 
         if($info['code'] != 200){
             $code=$this->code_num('GetMsgFail');
             return $this->errors($code,__LINE__);
         }
+
+
         $list=[];
         if(!empty($info['data']['list'])){
             foreach ($info['data']['list'] as $value){
+                //默认选中
                 $checked= $finance_id == $value['finance_id'] ? 1 : 0;
                 $temp=[
                    'finance_id' => $value['finance_id'],
@@ -570,6 +582,77 @@ class FinanceController extends CommonController
         return $this->response($list, 200);
     }
 
+    /**
+     * 币种改变
+     * @param Request $request
+     * @return array
+     */
+    public function coinChange(Request $request)
+    {
+        $data=$this->validate($request,[
+            'finance_id'=> 'required|int|min:1',
+            'finance_type' => 'required|string|in:otc,exchange'
+        ]);
+
+        //当前钱包币种资产信息
+        $finance_info=$this->financeService->getFinance($data['finance_id']);
+        if(empty($finance_info['data'])){
+            $code=$this->code_num('FinanceEmpty');
+            return $this->errors($code,__LINE__);
+        }
+        $roll_out_available=$finance_info['finance_available'];//转出账户可用余额
+        $roll_out_coin_name=$finance_info['coin_name'];//转出账户币种名称
+
+        $param=[
+            'user_id'=>$this->user_id,
+            'coin_id'=>$finance_info['data']['coin_id']
+        ];
+        switch ($data['finance_type']){
+            case 'otc':
+                //otc钱包当前币种信息
+                $otcService=app(OtcService::class);
+                $otc_finance=$otcService->getOtcFinance($param);
+                if($otc_finance['code'] != 200){
+                    $code=$this->code_num('NetworkAnomaly');
+                    return $this->errors($code,__LINE__);
+                }
+                if(empty($otc_finance['data']['list'])){
+                    $code=$this->code_num('RollError');
+                    return $this->errors($code,__LINE__);
+                }
+                $finance_data=current($otc_finance['data']['list']);
+                $roll_in_available=$finance_data['finance_available'];//转入账户可用余额
+                $roll_in_coin_name=$finance_data['coin_name'];       //转入账户币种名称
+                break;
+            case 'exchange':
+                //币币钱包当前币种信息
+                $exchangeService=app(ExchangeService::class);
+                $exchange_finance=$exchangeService->getExchangeFinance($param);
+                if($exchange_finance['code'] != 200){
+                    $code=$this->code_num('NetworkAnomaly');
+                    return $this->errors($code,__LINE__);
+                }
+                if(empty($exchange_finance['data']['list'])){
+                    $code=$this->code_num('RollError');
+                    return $this->errors($code,__LINE__);
+                }
+                $finance_data=current($exchange_finance['data']['list']);
+                $roll_in_available=$finance_data['finance_available'];//转入账户可用余额
+                $roll_in_coin_name=$finance_data['coin_name'];//转入账户币种名称
+                break;
+            default:
+                $roll_in_available =0;
+                $roll_in_coin_name ='';
+        }
+        $info=[
+            'roll_out_available' => $roll_out_available,
+            'roll_out_coin_name' => $roll_out_coin_name,
+            'roll_in_available'  => $roll_in_available,
+            'roll_in_coin_name'  => $roll_in_coin_name
+        ];
+        return $this->response($info, 200);
+    }
+
 
      /**
      * 划转
@@ -579,7 +662,7 @@ class FinanceController extends CommonController
     public function financeShift(Request $request)
     {
         //划出账户
-        $account=[];
+        $account=['finance','otc','exchange'];
         //转入账户
 
     }

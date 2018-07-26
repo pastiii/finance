@@ -20,6 +20,17 @@ class ExchangeService
     }
 
     /**
+     * 获取用户资产信息
+     * @param $data array
+     * @return array
+     */
+    public function getExchangeFinance($data)
+    {
+        $url = "exchange/exchange_finance?".http_build_query($data);
+        return $this->send_request($url, 'get',[],$this->exchangeService);
+    }
+
+    /**
      * 获取用户币币资产信息列表
      * @param $data array
      * @return array
