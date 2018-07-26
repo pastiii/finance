@@ -97,11 +97,11 @@ class ExchangeController extends CommonController
         $data['user_id']=$this->user_id;
         //获取用户币币交易资产信息列表
         $list= $this->exchangeService->getExchangeFinanceList($data);
-/*
+
         if($list['code'] != 200){
             $code=$this->code_num('GetMsgFail');
             return $this->errors($code,__LINE__);
-        }*/
+        }
         //数据重组
         $info=[];
         if(!empty($list['data']['list'])){
@@ -136,7 +136,7 @@ class ExchangeController extends CommonController
         }
 
         $res['list']= $info;
-        $res['page']=$list['data']['page'];
+        $res['page']= $list['data']['page'];
 
         return $this->response($res, 200);
     }
@@ -160,13 +160,13 @@ class ExchangeController extends CommonController
         //获取用户币币交易资产信息历史列表
         $list= $this->exchangeService->getExchangeFinanceHistoryList($data);
 
-        /*if($list['code'] != 200){
+        if($list['code'] != 200){
             $code=$this->code_num('GetMsgFail');
             return $this->errors($code,__LINE__);
-        }*/
+        }
         //重组数据
         $info=[];
-        /*if(!empty($list['data']['list'])){
+        if(!empty($list['data']['list'])){
             foreach ($list['data']['list'] as $value){
                 for($i=0;$i<2;$i++){
                     $temp=[
@@ -180,7 +180,7 @@ class ExchangeController extends CommonController
                     array_push($info,$temp);
                 }
             }
-        }*/
+        }
         for($i=1;$i<3;$i++){
             $temp=[
                 'finance_history_id'   => $i,

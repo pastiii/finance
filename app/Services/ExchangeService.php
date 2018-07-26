@@ -41,10 +41,9 @@ class ExchangeService
         $url = "exchange/exchange_finance?".http_build_query($data);
         $list = $this->send_request($url, 'get',[],$this->exchangeService);
 
-       /* if($list['code'] == 200){
+        if($list['code'] == 200){
             $list['data']['page']=$page_info;
-        }*/
-        $list['data']['page']=$page_info;
+        }
         return $list;
     }
 
