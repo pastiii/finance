@@ -111,8 +111,8 @@ class FinanceController extends CommonController
                      'coin_name'  => $value['coin_name'],
                      'coin_type'  => $value['coin_type'],
                      'coin_image' => '',
-                     'finance_available' =>$value['finance_available_str'],
-                     'finance_amount' =>$value['finance_amount_str'],
+                     'finance_available' =>$k, //$value['finance_available_str'],
+                     'finance_amount' =>$k,//$value['finance_amount_str'],
                      'finance_amount_rmb' => '0.0'
                  ];
                  array_push($info,$temp);
@@ -292,9 +292,7 @@ class FinanceController extends CommonController
              'destination_addr' => 'required|string',//目标地址
              'withdraw_amount' => 'required|string',
              'password' =>'required',
-             'cation_type' => 'nullable|in:phone,email,google',
-             'cation_code' => 'nullable|string',
-             'cation_key'  => 'nullable|string'
+             'cation_type' => 'nullable|in:phone,email,google'
          ]);
          //钱包信息
          $finance_info=$this->financeService->getFinance($data['finance_id']);
@@ -319,6 +317,7 @@ class FinanceController extends CommonController
              $code=$this->code_num('FinanceAvailable');
              return $this->errors($code,__LINE__);
          }*/
+
          //检查password
          /*$pin_code=$this->checkPin($data['password']);
          if($pin_code !== true){
@@ -326,16 +325,14 @@ class FinanceController extends CommonController
          }*/
          //二次验证
          if(isset($data['cation_type'])){
-             $cation_data=[
-                 'cation_code' => $data['cation_code'],
-                 'cation_key'  => $data['cation_key']
-             ];
+             if($data['cation_type'] != 'google'){
+                 $cation_data=$this->validate($request,[
+                     'cation_code' => 'required',
+                     'cation_key' => 'required'
+                 ]);
+             }
             switch ($data['cation_type']){
                 case 'phone':
-                    $this->validate($cation_data,[
-                        'cation_code' => '',
-                        'cation_key'  => ''
-                    ]);
                     $phone_code = $this->validatePhoneCode($cation_data);
                     if($phone_code !== true){
                         return $this->errors($phone_code,__LINE__);
