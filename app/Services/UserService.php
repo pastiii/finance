@@ -126,4 +126,16 @@ class UserService{
         $url = "userauth/user_email/id/" . $id;
         return $this->send_request($url, 'get','',$this->authBaseUrl);
     }
+
+    /**
+     * 获取GoogleAuth信息
+     * @param $user_id
+     * @return array
+     */
+    public function getUserGoogleAuth($user_id)
+    {
+        $url = "userauth/user_google_auth/id/" . $user_id;
+        return $this->send_request($url, 'get','',$this->authBaseUrl);
+
+    }
 }

@@ -496,7 +496,7 @@ class FinanceController extends CommonController
         /* 不否存在secret */
         if (!isset($data['secret'])) {
             /* 判断用户是否绑定 */
-            if ($googleAuthenticator['code'] != 200) {
+            if ($googleAuthenticator['real_code'] != 200) {
                 $code = $this->code_num('Unbound');
                 return $code;
             }
