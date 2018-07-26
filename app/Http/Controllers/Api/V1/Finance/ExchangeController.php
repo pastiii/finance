@@ -151,7 +151,7 @@ class ExchangeController extends CommonController
         $data=$this->validate($request, [
             'limit'   => 'nullable|int|min:1',
             'page'    => 'nullable|int|min:1',
-            'finance_id' => 'nullable|int|min:1',
+            'exchange_finance_id' => 'nullable|int|min:1',
         ]);
         if(!isset($data['limit'])) $data['limit']=10;
         if(!isset($data['page'])) $data['page']=1;
