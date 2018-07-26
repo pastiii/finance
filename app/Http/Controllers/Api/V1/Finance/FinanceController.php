@@ -91,7 +91,7 @@ class FinanceController extends CommonController
          $data=$this->validate($request, [
              'limit'   => 'required|int|min:1',
              'page'    => 'required|int|min:1',
-             'coin_id' => 'nullable|int|min:1'
+             'coin_name' => 'nullable|string'
          ]);
          $data['user_id']=$this->user_id;
          //获取用户资产信息列表
@@ -260,7 +260,7 @@ class FinanceController extends CommonController
              return $this->errors($code,__LINE__);
          }
          //获取币种信息
-         /*$coin_info =$this->financeService->getCoin($finance_info['data']['coin_id']);
+         /*$coin_info =$this->financeService->getCoin(2);//$finance_info['data']['coin_id']
          if(empty($coin_info['data'])){
              $code = $this->code_num('NetworkAnomaly');
              return $this->errors($code,__LINE__);
@@ -272,10 +272,10 @@ class FinanceController extends CommonController
          if(empty($ping_data['data'])){
              $ping_status = 0;
          }
-         $res['finance_available']=$finance_info['data']['finance_available'];
-         $res['coin_status']  = 1;//$coin_info['data']['coin_status'];
-         $res['finance_rate'] = 15;//$coin_info['withdraw_fees'];//手续费率
-         $res['finance_upper']= 10000;//$coin_info['withdraw_one_max'];//单次提额上限
+         $res['finance_available']=1000; //$finance_info['data']['finance_available'];
+         $res['coin_status']  = 2;//$coin_info['data']['coin_status'];
+         $res['finance_rate'] = 100;//$coin_info['data']['withdraw_fees'];//手续费
+         $res['finance_upper']= 1000;//$coin_info['data']['withdrawone_max'];//单次提额上限
          $res['ping_status']  = $ping_status;
          $res['check_two']    = $this->checkTwoStatus();
          return $this->response($res, 200);
@@ -300,29 +300,36 @@ class FinanceController extends CommonController
              $code=$this->code_num('FinanceEmpty');
              return $this->errors($code,__LINE__);
          }
-        /* //获取币种信息
+/*
+         //获取币种信息
          $coin_info =$this->financeService->getCoin($finance_info['data']['coin_id']);
          if(empty($coin_info['data'])){
              $code = $this->code_num('NetworkAnomaly');
              return $this->errors($code,__LINE__);
          }
-
+         //判断币种是否正常
          if($coin_info['data']['coin_status'] != 2){
              $code = $this->code_num('CoinStatus');
              return $this->errors($code,__LINE__);
-         }*/
+         }
+         //判断提现金额是否大于单次限制金额
+         if($data['withdraw_amount'] > $coin_info['data']['withdrawone_max']){
+             $code=$this->code_num('WithdrawOneMax');
+             return $this->errors($code,__LINE__);
+         }
 
-         //判断余额
-         /*if($data['withdraw_amount'] > $finance_info['data']['finance_available']){
+         //判断提现金额是否大于可用余额
+         if($data['withdraw_amount'] > $finance_info['data']['finance_available']){
              $code=$this->code_num('FinanceAvailable');
              return $this->errors($code,__LINE__);
          }*/
 
-         //检查password
+         //检查资金密码
          /*$pin_code=$this->checkPin($data['password']);
          if($pin_code !== true){
              return $this->errors($pin_code,__LINE__);
          }*/
+
          //二次验证
          if(isset($data['cation_type'])){
              if($data['cation_type'] != 'google'){

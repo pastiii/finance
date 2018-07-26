@@ -14,10 +14,11 @@ class FinanceService
 {
      use ApiRequestTrait;
      protected $financeService;
-
+     protected $countryBaseUrl;
      public function __construct()
      {
          $this->financeService= env('FINANCE_BASE_URL');
+         $this->countryBaseUrl    = env('COMMON_COUNTRY_URL');
      }
 
     /**
@@ -165,6 +166,17 @@ class FinanceService
     {
         $url = "finance/finance?".http_build_query($data);
         return $this->send_request($url, 'get',[],$this->financeService);
+    }
+
+    /**
+     * 根据id获取币种
+     * @param $id int
+     * @return array
+     */
+    public function getCoin($id)
+    {
+        $url = "common/coin/id/".$id;
+        return $this->send_request($url, 'get',[],$this->countryBaseUrl);
     }
 
 

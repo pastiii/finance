@@ -91,7 +91,7 @@ class OtcController extends BaseController
         $data=$this->validate($request, [
             'limit'   => 'required|int|min:1',
             'page'    => 'required|int|min:1',
-            'coin_id' => 'nullable|int|min:1'
+            'coin_name' => 'nullable|string'
         ]);
         $data['user_id']=$this->user_id;
         //获取用户OTC资产信息列表

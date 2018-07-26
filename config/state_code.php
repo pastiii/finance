@@ -59,5 +59,6 @@ return [
     'FinanceAvailable'     => 7002, //提现余额不足
     'InfoEmpty'            => 7003, //数据为空
     'CoinStatus'           => 7004, //币种已禁用或限制提币
+    'WithdrawOneMax'       => 7005, //提现值大于单次提现额度
 ];
 
