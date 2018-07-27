@@ -27,8 +27,12 @@ class OtcService
      */
     public function getOtcFinanceById($id)
     {
-        $url = "otc/otc_finance/id".$id;
-        return $this->send_request($url, 'get',[],$this->otcService);
+        $url = "otc/otc_finance?".$id;
+        $res= $this->send_request($url, 'get',[],$this->otcService);
+        return [
+            'code' => 200,
+            'data' => current($res['data']['list'])
+        ];
     }
 
     /**

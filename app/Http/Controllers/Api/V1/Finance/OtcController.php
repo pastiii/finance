@@ -215,11 +215,11 @@ class OtcController extends CommonController
     public function getOtcFinanceCoinList(Request $request)
     {
         $data=$this->validate($request,[
-            'finance_id' => 'required|int|min:1',
+            'otc_finance_id' => 'required|int|min:1',
         ]);
-        $finance_id=$data['finance_id'];
+        $finance_id=$data['otc_finance_id'];
         //当前钱包币种资产信息
-        $finance_info=$this->otcService->getOtcFinanceById($data['finance_id']);
+        $finance_info=$this->otcService->getOtcFinanceById($data['otc_finance_id']);
         if(empty($finance_info['data'])){
             $code=$this->code_num('FinanceEmpty');
             return $this->errors($code,__LINE__);
@@ -236,9 +236,9 @@ class OtcController extends CommonController
         if(!empty($info['data']['list'])){
             foreach ($info['data']['list'] as $value){
                 //默认选中
-                $checked= $finance_id == $value['finance_id'] ? 1 : 0;
+                $checked= $finance_id == $value['otc_finance_id'] ? 1 : 0;
                 $temp=[
-                    'finance_id' => $value['finance_id'],
+                    'otc_finance_id' => $value['otc_finance_id'],
                     'coin_id'    => $value['coin_id'],
                     'coin_name'  => $value['coin_name'],
                     //'checked'    => $checked
@@ -274,12 +274,12 @@ class OtcController extends CommonController
     public function otcCoinChange(Request $request)
     {
         $data=$this->validate($request,[
-            'finance_id'   => 'required|int|min:1',
-            'roll_in_finance' => 'required|string|in:finance,exchange'
+            'otc_finance_id'   => 'required|int|min:1',
+            'roll_in_finance'  => 'required|string|in:finance,exchange'
         ]);
 
         //当前钱包币种资产信息
-        $finance_info=$this->otcService->getOtcFinanceById($data['finance_id']);
+        $finance_info=$this->otcService->getOtcFinanceById($data['otc_finance_id']);
         if(empty($finance_info['data'])){
             $code=$this->code_num('FinanceEmpty');
             return $this->errors($code,__LINE__);
@@ -350,11 +350,11 @@ class OtcController extends CommonController
         $data=$this->validate($request,[
             //'roll_out_finance'=>'nullable|string|in:finance,otc,exchange',
             'roll_in_finance' =>'required|string|in:finance,exchange',
-            'finance_id'      =>'required|int|min:1',
+            'otc_finance_id'      =>'required|int|min:1',
             'amount'          =>'required'
         ]);
         //当前钱包币种资产信息
-        $finance_info=$this->otcService->getOtcFinanceById($data['finance_id']);
+        $finance_info=$this->otcService->getOtcFinanceById($data['otc_finance_id']);
         if(empty($finance_info['data'])){
             $code=$this->code_num('NetworkAnomaly');
             return $this->errors($code,__LINE__);
