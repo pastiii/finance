@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\V1\Common\CommonController;
 use Dingo\Api\Http\Request;
 use App\Services\ExchangeService;
 use App\Services\UserService;
+use App\Services\FinanceService;
+use App\Services\OtcService;
 
 class ExchangeController extends CommonController
 {
@@ -220,5 +222,183 @@ class ExchangeController extends CommonController
 
     }
 
+    /**
+     * 币种列表
+     * @param Request $request
+     * @return array
+     */
+    public function getExchangeFinanceCoinList(Request $request)
+    {
+        $data=$this->validate($request,[
+            'exchange_finance_id' => 'required|int|min:1',
+        ]);
+        $finance_id=$data['exchange_finance_id'];
+        //当前钱包币种资产信息
+        $finance_info=$this->exchangeService->getExchangeFinanceById($data['exchange_finance_id']);
+        if(empty($finance_info['data'])){
+            $code=$this->code_num('FinanceEmpty');
+            return $this->errors($code,__LINE__);
+        }
+        //获取当前用户钱包币种列表
+        $info=$this->exchangeService->getCoinList([]);
+
+        if($info['code'] != 200){
+            $code=$this->code_num('GetMsgFail');
+            return $this->errors($code,__LINE__);
+        }
+
+        $list=[];
+        if(!empty($info['data']['list'])){
+            foreach ($info['data']['list'] as $value){
+                //默认选中
+                $checked= $finance_id == $value['exchange_finance_id'] ? 1 : 0;
+                $temp=[
+                    'exchange_finance_id' => $value['exchange_finance_id'],
+                    'coin_id'    => $value['coin_id'],
+                    'coin_name'  => $value['coin_name'],
+                    //'checked'    => $checked
+                ];
+                array_push($list,$temp);
+            }
+        }
+        //转出账户
+        $roll_out =['exchange'];
+        //转入账户
+        $roll_in  =['finance','otc'];
+        //当前币种可用余额
+        $roll_out_available=$finance_info['data']['finance_amount'];//转出账户可用余额
+        $roll_out_coin_name=$finance_info['data']['coin_name'];//转出账户币种名称
+
+        //返回数据
+        $res=[
+            'list'=>$list,
+            'roll_out' => $roll_out,
+            'roll_in'  => $roll_in,
+            'roll_out_available' => $roll_out_available,
+            'roll_out_coin_name' => $roll_out_coin_name
+        ];
+
+        return $this->response($res, 200);
+    }
+
+    /**
+     * 币种改变
+     * @param Request $request
+     * @return array
+     */
+    public function exchangeCoinChange(Request $request)
+    {
+        $data=$this->validate($request,[
+            'exchange_finance_id'   => 'required|int|min:1',
+            'roll_in_finance'  => 'nullable|string|in:finance,otc'
+        ]);
+        if(!isset($data['roll_in_finance'])) $data['roll_in_finance']='';
+        //当前钱包币种资产信息
+        $finance_info=$this->exchangeService->getExchangeFinanceById($data['exchange_finance_id']);
+        if(empty($finance_info['data'])){
+            $code=$this->code_num('FinanceEmpty');
+            return $this->errors($code,__LINE__);
+        }
+        $roll_out_available=$finance_info['data']['finance_amount'];//转出账户可用余额
+        $roll_out_coin_name=$finance_info['data']['coin_name'];//转出账户币种名称
+
+        $param=[
+            'user_id'=> 1, //$this->user_id,
+            'coin_id'=> 8 //$finance_info['data']['coin_id']
+        ];
+        switch ($data['roll_in_finance']){
+            case 'finance':
+                //钱包当前币种信息
+                /* @var FinanceService  $financeService*/
+                $financeService=app(FinanceService::class);
+                $finance=$financeService->getFinanceByCoin($param);
+                if($finance['code'] != 200){
+                    $code=$this->code_num('NetworkAnomaly');
+                    return $this->errors($code,__LINE__);
+                }
+                if(empty($finance['data']['list'])){
+                    $code=$this->code_num('RollError');
+                    return $this->errors($code,__LINE__);
+                }
+                $finance_data=current($finance['data']['list']);
+                $roll_in_available=$finance_data['finance_available'];//转入账户可用余额
+                $roll_in_coin_name=$finance_data['coin_name'];       //转入账户币种名称
+                break;
+            case 'otc':
+                //otc钱包当前币种信息
+                /* @var OtcService  $otcService*/
+                $otcService=app(OtcService::class);
+                $otc_finance=$otcService->getOtcFinance($param);
+                if($otc_finance['code'] != 200){
+                    $code=$this->code_num('NetworkAnomaly');
+                    return $this->errors($code,__LINE__);
+                }
+                if(empty($otc_finance['data']['list'])){
+                    $code=$this->code_num('RollError');
+                    return $this->errors($code,__LINE__);
+                }
+                $finance_data=current($otc_finance['data']['list']);
+                $roll_in_available=$finance_data['finance_available'];//转入账户可用余额
+                $roll_in_coin_name=$finance_data['coin_name'];       //转入账户币种名称
+                break;
+            default:
+                $roll_in_available =0;
+                $roll_in_coin_name ='';
+        }
+        $info=[
+            'roll_out_available' => $roll_out_available,
+            'roll_out_coin_name' => $roll_out_coin_name,
+            'roll_in_available'  => $roll_in_available,
+            'roll_in_coin_name'  => $roll_in_coin_name
+        ];
+        return $this->response($info, 200);
+    }
+
+
+    /**
+     * 划转
+     * @param Request $request
+     * @return array
+     */
+    public function exchangeFinanceShift(Request $request)
+    {
+        $data=$this->validate($request,[
+            //'roll_out_finance'=>'nullable|string|in:finance,otc,exchange',
+            'roll_in_finance' =>'required|string|in:finance,otc',
+            'exchange_finance_id'      =>'required|int|min:1',
+            'amount'          =>'required'
+        ]);
+        //当前钱包币种资产信息
+        $finance_info=$this->exchangeService->getExchangeFinanceById($data['exchange_finance_id']);
+        if(empty($finance_info['data'])){
+            $code=$this->code_num('FinanceEmpty');
+            return $this->errors($code,__LINE__);
+        }
+        //判断是否可划转
+        if($finance_info['data']['coin_type'] == 2){
+            $code=$this->code_num('CoinRoll');
+            return $this->errors($code,__LINE__);
+        }
+        $coin_id=$finance_info['data']['coin_id'];
+
+        switch ($data['roll_in_finance']){
+            case 'finance':
+                $res= $this->exchangeService->exchangeToFinance($this->user_id,$coin_id,$data['amount']);
+                if($res['code'] != 200){
+                    $code=$this->code_num('TransferError');
+                    return $this->errors($code,__LINE__);
+                }
+                break;
+            case 'otc':
+                $res= $this->exchangeService->exchangeToOtc($this->user_id,$coin_id,$data['amount']);
+                if($res['code'] != 200){
+                    $code=$this->code_num('TransferError');
+                    return $this->errors($code,__LINE__);
+                }
+                break;
+        }
+
+        return $this->response('ok', 200);
+    }
 
 }

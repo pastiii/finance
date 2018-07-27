@@ -556,8 +556,8 @@ class FinanceController extends CommonController
             $code=$this->code_num('FinanceEmpty');
             return $this->errors($code,__LINE__);
         }
-        //获取当前钱包币种列表
-        $info=$this->financeService->getCoinList($data);
+        //获取当前用户钱包币种列表
+        $info=$this->financeService->getCoinList(['user_id'=>$this->user_id]);
 
         if($info['code'] != 200){
             $code=$this->code_num('GetMsgFail');

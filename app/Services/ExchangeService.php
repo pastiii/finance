@@ -13,10 +13,24 @@ class ExchangeService
 {
     use ApiRequestTrait;
     protected $exchangeService;
+    protected $transferBaseUrl;
 
     public function __construct()
     {
         $this->exchangeService= env('EXCHANGE_BASE_URL');
+        $this->transferBaseUrl = env('TRANSFER_BASE_URL');
+    }
+
+    /**
+     * 获取用户资产信息(根据finance_id)
+     * @param $id int
+     * @return array
+     */
+    public function getExchangeFinanceById($id)
+    {
+        $url = "exchange/exchange_finance/id/".$id;
+        return $this->send_request($url, 'get',[],$this->exchangeService);
+
     }
 
     /**
@@ -122,6 +136,41 @@ class ExchangeService
     {
         $url = "exchange/exchange_finance_history/id/".$id;
         return $this->send_request($url, 'get',[],$this->exchangeService);
+    }
+
+    /**
+     * 获取币种列表
+     * @param $data array
+     * @return array
+     */
+    public function getCoinList($data)
+    {
+        $url = "exchange/exchange_finance?".http_build_query($data);
+        return $this->send_request($url, 'get',[],$this->exchangeService);
+    }
+
+    /**
+     * BB划转钱包
+     * @param $user_id int
+     * @param $coin_id int
+     * @param $amount
+     * @return array
+     */
+    public function exchangeToFinance($user_id,$coin_id,$amount){
+        $url = "exchange/to_finance/user_id/{$user_id}/coin_id/{$coin_id}";
+        return $this->send_request($url, 'post',['amount'=>$amount],$this->transferBaseUrl);
+    }
+
+    /**
+     * BB划转OTC
+     * @param $user_id int
+     * @param $coin_id int
+     * @param $amount
+     * @return array
+     */
+    public function exchangeToOtc($user_id,$coin_id,$amount){
+        $url = "exchange/to_otc/user_id/{$user_id}/coin_id/{$coin_id}";
+        return $this->send_request($url, 'post',['amount'=>$amount],$this->transferBaseUrl);
     }
 
 

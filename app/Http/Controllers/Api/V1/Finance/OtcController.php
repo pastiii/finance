@@ -224,8 +224,8 @@ class OtcController extends CommonController
             $code=$this->code_num('FinanceEmpty');
             return $this->errors($code,__LINE__);
         }
-        //获取当前钱包币种列表
-        $info=$this->otcService->getCoinList($data);
+        //获取当前用户钱包币种列表
+        $info=$this->otcService->getCoinList(['user_id'=>$this->user_id]);
 
         if($info['code'] != 200){
             $code=$this->code_num('GetMsgFail');
@@ -275,9 +275,9 @@ class OtcController extends CommonController
     {
         $data=$this->validate($request,[
             'otc_finance_id'   => 'required|int|min:1',
-            'roll_in_finance'  => 'required|string|in:finance,exchange'
+            'roll_in_finance'  => 'nullable|string|in:finance,exchange'
         ]);
-
+        if(!isset($data['roll_in_finance'])) $data['roll_in_finance']='';
         //当前钱包币种资产信息
         $finance_info=$this->otcService->getOtcFinanceById($data['otc_finance_id']);
         if(empty($finance_info['data'])){
