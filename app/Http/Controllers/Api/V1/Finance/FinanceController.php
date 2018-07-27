@@ -609,7 +609,7 @@ class FinanceController extends CommonController
             'finance_id'   => 'required|int|min:1',
             'roll_in_finance' => 'nullable|string|in:otc,exchange'
         ]);
-
+        if(!isset($data['roll_in_finance'])) $data['roll_in_finance']='';
         //当前钱包币种资产信息
         $finance_info=$this->financeService->getFinance($data['finance_id']);
         if(empty($finance_info['data'])){
@@ -623,6 +623,7 @@ class FinanceController extends CommonController
             'user_id'=> 1, //$this->user_id,
             'coin_id'=> 8 //$finance_info['data']['coin_id']
         ];
+
         switch ($data['roll_in_finance']){
             case 'otc':
                 //otc钱包当前币种信息
