@@ -104,6 +104,7 @@ class OtcController extends CommonController
         $info=[];
         if(!empty($list['data']['list'])){
             foreach ($list['data']['list'] as $k=>$value){
+                $k==2?$k=0:'';
                 $temp=[
                     'otc_finance_id'      => $value['otc_finance_id'],
                     'coin_id'             => $value['coin_id'],
