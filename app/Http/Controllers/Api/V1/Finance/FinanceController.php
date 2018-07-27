@@ -607,7 +607,7 @@ class FinanceController extends CommonController
     {
         $data=$this->validate($request,[
             'finance_id'   => 'required|int|min:1',
-            'roll_in_finance' => 'required|string|in:otc,exchange'
+            'roll_in_finance' => 'nullable|string|in:otc,exchange'
         ]);
 
         //当前钱包币种资产信息
