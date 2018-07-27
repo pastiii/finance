@@ -149,6 +149,7 @@ $api->version('v1', function ($api) {
             $api->post('create_finance_shift','FinanceController@financeShift');//提交划转
             $api->get('get_finance_coin_list','FinanceController@getFinanceCoinList');//币种列表
             $api->get('coinChange','FinanceController@coinChange');//划转币种改变
+            $api->post('create_finance_shift','FinanceController@financeShift');//提交划转
             /* OTC钱包 */
             $api->get('otc_user_info', 'OtcController@getUserInfo');//获取用户资产信息列表
             $api->get('otc_finance_list', 'OtcController@getOtcFinanceList');//获取用户OTC资产信息列表

@@ -571,7 +571,7 @@ class FinanceController extends CommonController
                 $checked= $finance_id == $value['finance_id'] ? 1 : 0;
                 $temp=[
                    'finance_id' => $value['finance_id'],
-                   //'coin_id'    => $value['coin_id'],
+                   'coin_id'    => $value['coin_id'],
                    'coin_name'  => $value['coin_name'],
                    //'checked'    => $checked
                 ];
@@ -677,7 +677,13 @@ class FinanceController extends CommonController
      */
     public function financeShift(Request $request)
     {
-        $data='';
+        $data=$this->validate($request,[
+            'roll_out_finance'=>'required|string|in:finance,otc,exchange',
+            'roll_in_finance' =>'required|string|in:finance,otc,exchange',
+            'coin_id'         =>'required|int|min:1',
+            'amount'          =>'required'
+        ]);
+        return $this->response('', 200);
     }
 
 
