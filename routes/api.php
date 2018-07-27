@@ -155,6 +155,9 @@ $api->version('v1', function ($api) {
             $api->get('otc_finance_list', 'OtcController@getOtcFinanceList');//获取用户OTC资产信息列表
             $api->get('otc_finance_history_list', 'OtcController@getOtcFinanceHistoryList');//获取用户OTC资产信息历史列表
             $api->get('otc_finance_history', 'OtcController@getOtcFinanceHistory');//获取用户OTC资产信息历史
+            $api->get('otc_finance_coin_list','FinanceController@getOtcFinanceCoinList');//币种列表
+            $api->get('otc_coinChange','FinanceController@otcCoinChange');//划转币种改变
+            $api->post('otc_finance_shift','FinanceController@otcFinanceShift');//提交划转
             /*币币交易*/
             $api->get('exchange_user_info', 'ExchangeController@getUserInfo');//获取用户资产信息列表
             $api->get('exchange_finance_list', 'ExchangeController@getExchangeFinanceList');//获取用户OTC资产信息列表

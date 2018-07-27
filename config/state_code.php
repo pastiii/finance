@@ -60,6 +60,8 @@ return [
     'InfoEmpty'            => 7003, //数据为空
     'CoinStatus'           => 7004, //币种已禁用或限制提币
     'WithdrawOneMax'       => 7005, //提现值大于单次提现额度
-    'RollError'            => 7006, //不可划转
+    'RollError'            => 7006, //转至账户不存在该币种
+    'CoinRoll'             => 7007, //该币禁止划转
+    'TransferError'        => 7008, //划转失败
 ];
 
