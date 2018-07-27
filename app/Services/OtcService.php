@@ -13,14 +13,26 @@ class OtcService
 {
     use ApiRequestTrait;
     protected $otcService;
-
+    protected $transferBaseUrl;
     public function __construct()
     {
         $this->otcService= env('OTC_BASE_URL');
+        $this->transferBaseUrl = env('TRANSFER_BASE_URL');
     }
 
     /**
-     * 获取用户资产信息
+     * 获取用户资产信息(根据finance_id)
+     * @param $id int
+     * @return array
+     */
+    public function getOtcFinanceById($id)
+    {
+        $url = "otc/otc_finance/id".$id;
+        return $this->send_request($url, 'get',[],$this->otcService);
+    }
+
+    /**
+     * 获取用户资产信息(根据coin)
      * @param $data array
      * @return array
      */
@@ -123,5 +135,39 @@ class OtcService
         return $this->send_request($url, 'get',[],$this->otcService);
     }
 
+    /**
+     * 获取币种列表
+     * @param $data array
+     * @return array
+     */
+    public function getCoinList($data)
+    {
+        $url = "otc/otc_finance?".http_build_query($data);
+        return $this->send_request($url, 'get',[],$this->otcService);
+    }
+
+    /**
+     * OTC划转钱包
+     * @param $user_id int
+     * @param $coin_id int
+     * @param $amount
+     * @return array
+     */
+    public function otcToFinance($user_id,$coin_id,$amount){
+        $url = "otc/to_finance/user_id/{$user_id}/coin_id/{$coin_id}";
+        return $this->send_request($url, 'post',['amount'=>$amount],$this->transferBaseUrl);
+    }
+
+    /**
+     * OTC划转币币
+     * @param $user_id int
+     * @param $coin_id int
+     * @param $amount
+     * @return array
+     */
+    public function otcToExchange($user_id,$coin_id,$amount){
+        $url = "otc/to_exchange/user_id/{$user_id}/coin_id/{$coin_id}";
+        return $this->send_request($url, 'post',['amount'=>$amount],$this->transferBaseUrl);
+    }
 
 }

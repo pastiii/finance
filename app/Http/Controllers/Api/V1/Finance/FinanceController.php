@@ -626,6 +626,7 @@ class FinanceController extends CommonController
         switch ($data['roll_in_finance']){
             case 'otc':
                 //otc钱包当前币种信息
+                /* @var OtcService  $otcService*/
                 $otcService=app(OtcService::class);
                 $otc_finance=$otcService->getOtcFinance($param);
                 if($otc_finance['code'] != 200){
@@ -642,6 +643,7 @@ class FinanceController extends CommonController
                 break;
             case 'exchange':
                 //币币钱包当前币种信息
+                /* @var ExchangeService  $exchangeService*/
                 $exchangeService=app(ExchangeService::class);
                 $exchange_finance=$exchangeService->getExchangeFinance($param);
                 if($exchange_finance['code'] != 200){
@@ -678,12 +680,42 @@ class FinanceController extends CommonController
     public function financeShift(Request $request)
     {
         $data=$this->validate($request,[
-            'roll_out_finance'=>'required|string|in:finance,otc,exchange',
-            'roll_in_finance' =>'required|string|in:finance,otc,exchange',
-            'coin_id'         =>'required|int|min:1',
+            //'roll_out_finance'=>'nullable|string|in:finance,otc,exchange',
+            'roll_in_finance' =>'required|string|in:otc,exchange',
+            'finance_id'      =>'required|int|min:1',
             'amount'          =>'required'
         ]);
-        return $this->response('', 200);
+        //当前钱包币种资产信息
+        $finance_info=$this->financeService->getFinance($data['finance_id']);
+        if(empty($finance_info['data'])){
+            $code=$this->code_num('NetworkAnomaly');
+            return $this->errors($code,__LINE__);
+        }
+        //判断是否可划转
+        if($finance_info['data']['coin_type'] == 2){
+            $code=$this->code_num('CoinRoll');
+            return $this->errors($code,__LINE__);
+        }
+        $coin_id=$finance_info['data']['coin_id'];
+
+        switch ($data['roll_in_finance']){
+            case 'otc':
+                $res= $this->financeService->financeToOtc($this->user_id,$coin_id,$data['amount']);
+                if($res['code'] != 200){
+                    $code=$this->code_num('TransferError');
+                    return $this->errors($code,__LINE__);
+                }
+                break;
+            case 'exchange':
+                $res= $this->financeService->financeToExchange($this->user_id,$coin_id,$data['amount']);
+                if($res['code'] != 200){
+                    $code=$this->code_num('TransferError');
+                    return $this->errors($code,__LINE__);
+                }
+                break;
+        }
+
+        return $this->response('ok', 200);
     }
 
 
