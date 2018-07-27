@@ -379,6 +379,12 @@ class ExchangeController extends CommonController
             $code=$this->code_num('CoinRoll');
             return $this->errors($code,__LINE__);
         }
+        /*//判断输入金额是否大于可划转余额
+       if($data['amount'] > $finance_info['data']['finance_available']){
+           $code=$this->code_num('AmountError');
+           return $this->errors($code,__LINE__);
+       }*/
+
         $coin_id=$finance_info['data']['coin_id'];
 
         switch ($data['roll_in_finance']){
@@ -396,6 +402,9 @@ class ExchangeController extends CommonController
                     return $this->errors($code,__LINE__);
                 }
                 break;
+            default:
+                $code=$this->code_num('TransferError');
+                return $this->errors($code,__LINE__);
         }
 
         return $this->response('ok', 200);
