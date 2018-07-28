@@ -114,7 +114,7 @@ class ExchangeController extends CommonController
                     'coin_name'           => $value['coin_name'],
                     'coin_type'           => $value['coin_type'],
                     'coin_image'          => '',
-                    'finance_available'   => $value['finance_available_str'],
+                    'finance_available'   => $value['finance_amount'],
                     'finance_amount'      => $value['finance_amount_str'],
                     'finance_amount_rmb'  => '0.0',
                     'frozen_capital'      => '0.0'
