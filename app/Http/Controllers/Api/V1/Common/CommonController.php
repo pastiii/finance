@@ -194,4 +194,25 @@ class CommonController extends BaseController
 
         return $this->response("", 200);
     }
+
+    /**
+     * 绑定google 信息
+     * @param $user_data
+     * @param $secret
+     * @return bool
+     */
+    protected  function bindingGoogleKey ($user_data, $secret)
+    {
+
+        $google_data['user_id']    = intval($user_data['user_id']);
+        $google_data['user_name']  = $user_data['user_name'];
+        $google_data['google_key'] = $secret;
+        /* 创建用户google_key */
+        $response = $this->userService->createUserGoogleAuth($google_data);
+        /* 授权失败 */
+        if ($response['code'] != 200) {
+            return false;
+        }
+        return true;
+    }
 }

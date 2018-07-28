@@ -138,4 +138,24 @@ class UserService{
         return $this->send_request($url, 'get','',$this->authBaseUrl);
 
     }
+
+    /**
+     * 创建google key
+     * @param $data
+     * @return array
+     */
+    public function createUserGoogleAuth($data)
+    {
+        $url = "userauth/user_google_auth";
+        return $this->send_request($url, 'post', $data,$this->authBaseUrl);
+
+    }
+
+    public function editUserGoogleAuth($secret,$user_id)
+    {
+        $url = 'userauth/user_google_auth/id/'.$user_id.'?cole=true';
+        $data['google_key'] = $secret;
+        return $this->send_request($url, 'patch', $data,$this->authBaseUrl);
+
+    }
 }

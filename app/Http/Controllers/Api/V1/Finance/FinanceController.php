@@ -539,6 +539,15 @@ class FinanceController extends CommonController
         return true;
     }
 
+    private function  editGoogleKey($secret)
+    {
+        $response = $this->userService->editUserGoogleAuth($secret, $this->user_id);
+        if ($response['code'] != 200) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * 币种列表
      * @param Request $request
