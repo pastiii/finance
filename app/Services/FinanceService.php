@@ -58,10 +58,10 @@ class FinanceService
          }
          //分页信息
          $page_info['count']=$count['data']['count'];//总数量
-         $page_info['current_page'] = intval($data['page']);//当前页
+         /*$page_info['current_page'] = intval($data['page']);//当前页
          $page_info['total_page'] =  ceil($count['data']['count']/$data['limit']);//每页显示数量
 
-         $data['start']=($data['page']-1)*$data['limit'];
+         $data['start']=($data['page']-1)*$data['limit'];*/
          $url = "finance/finance?".http_build_query($data);
          $list = $this->send_request($url, 'get',[],$this->financeService);
 
@@ -79,8 +79,8 @@ class FinanceService
      */
      public function getFinanceCount($data)
      {
-         unset($data['limit']);
-         unset($data['page']);
+         //unset($data['limit']);
+         //unset($data['page']);
          $url = "finance/finance/count?".http_build_query($data);
          return $this->send_request($url, 'get',[],$this->financeService);
      }

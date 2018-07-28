@@ -92,8 +92,8 @@ class FinanceController extends CommonController
      public function getFinanceList(Request $request)
      {
          $data=$this->validate($request, [
-             'limit'   => 'required|int|min:1',
-             'page'    => 'required|int|min:1',
+             /*'limit'   => 'required|int|min:1',
+             'page'    => 'required|int|min:1',*/
              'coin_name' => 'nullable|string'
          ]);
 
