@@ -96,9 +96,9 @@ class ExchangeController extends CommonController
         ]);
         if(!isset($data['limit'])) $data['limit']=10;
         if(!isset($data['page'])) $data['page']=1;
-        $data['user_id']=$this->user_id;
+        $data['user_id']=1;//$this->user_id;
         //获取用户币币交易资产信息列表
-        $list= $this->exchangeService->getExchangeFinanceList(['user_id'=>1]);
+        $list= $this->exchangeService->getExchangeFinanceList($data);
 
         if($list['code'] != 200){
             $code=$this->code_num('GetMsgFail');
@@ -122,6 +122,7 @@ class ExchangeController extends CommonController
                 array_push($info,$temp);
             }
         }
+
         $res['list']= $info;
         $res['page']= $list['data']['page'];
 
