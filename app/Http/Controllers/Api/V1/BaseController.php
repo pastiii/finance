@@ -13,7 +13,7 @@ class BaseController extends Controller
        /* $info = ['user_name'=>'tom','user_id'=>256,'type'=>'user','email'=>'m15202471353@163.com'];
         $this->type = 1; // 1:pc 2:Mobile
         $this->token = Apiauth::login($info,$this->type);*/
-        $this->user_id = intval(ApiAuth::userId());
+        $this->user_id =1; //intval(ApiAuth::userId());
     }
 
     /**
