@@ -30,6 +30,7 @@ class FinanceController extends CommonController
          parent::__construct();
          $this->getFinanceService();
          $this->getUserService();
+
      }
 
     /**
@@ -100,45 +101,25 @@ class FinanceController extends CommonController
          $list= $this->financeService->getFinanceList($data);
 
          if($list['code'] != 200){
-             $code=$this->code_num('GetMsgFail');
+             $code=$this->code_num('NetworkAnomaly');
              return $this->errors($code,__LINE__);
          }
          //重组数据
          $info=[];
          if(!empty($list['data']['list'])){
-             foreach ($list['data']['list'] as $k=>$value){
-                 if($k==1) {
-                     $value['finance_available_str'] =0;
-                     $value['finance_amount_str']=0;
+             foreach ($list['data']['list'] as $value){
+                 $coin_info=$this->financeService->getCoin($value['coin_id']);
+                 if(empty($coin_info['data'])){
+                     $coin_image='';
+                 }else{
+                     $coin_image=$coin_info['data']['coin_image'];
                  }
                  $temp=[
                      'finance_id' => $value['finance_id'],
                      'coin_id'    => $value['coin_id'],
                      'coin_name'  => $value['coin_name'],
                      'coin_type'  => $value['coin_type'],
-                     'coin_image' => '',
-                     'finance_available' =>$value['finance_available_str'],
-                     'finance_amount' =>$value['finance_amount_str'],
-                     'finance_amount_rmb' => '0.0'
-                 ];
-                 array_push($info,$temp);
-                 $temp=[
-                     'finance_id' => $value['finance_id'],
-                     'coin_id'    => $value['coin_id'],
-                     'coin_name'  => $value['coin_name'],
-                     'coin_type'  => $value['coin_type'],
-                     'coin_image' => '',
-                     'finance_available' =>$value['finance_available_str'],
-                     'finance_amount' =>$value['finance_amount_str'],
-                     'finance_amount_rmb' => '0.0'
-                 ];
-                 array_push($info,$temp);
-                 $temp=[
-                     'finance_id' => $value['finance_id'],
-                     'coin_id'    => $value['coin_id'],
-                     'coin_name'  => $value['coin_name'],
-                     'coin_type'  => $value['coin_type'],
-                     'coin_image' => '',
+                     'coin_image' => $coin_image,
                      'finance_available' =>$value['finance_available_str'],
                      'finance_amount' =>$value['finance_amount_str'],
                      'finance_amount_rmb' => '0.0'
@@ -198,26 +179,28 @@ class FinanceController extends CommonController
      */
      public function getFinanceHistoryList(Request $request)
      {
+         if(isset($this->user_id)){
+             $this->user_id=1;
+         }
+
          $data=$this->validate($request, [
              'coin_id' => 'required|int|min:1',
              'limit'   => 'nullable|int|min:1',
              'page'    => 'nullable|int|min:1'
          ]);
          $data['user_id']=$this->user_id;
-         if(!isset($data['limit']))  $data['limit']=10;
+         if(!isset($data['limit']))  $data['limit']=12;
          if(!isset($data['page']))  $data['page']=1;
          //获取用户资产信息历史列表
          $list= $this->financeService->getFinanceHistoryList($data);
 
          if($list['code'] != 200){
-             $code=$this->code_num('GetMsgFail');
+             $code=$this->code_num('NetworkAnomaly');
              return $this->errors($code,__LINE__);
          }
-
          //重组数据
          $info=[];
          if(!empty($list['data']['list'])){
-
              $coin_info=$this->financeService->getCoin($data['coin_id']);
              if(empty($coin_info['data'])){
                  $coin_image='';
@@ -418,7 +401,7 @@ class FinanceController extends CommonController
          $res=$this->financeService->createFinanceWithdraw($withdraw_data);
 
          if($res['code'] != 200){
-             $code=$this->code_num('CreateFailure');
+             $code=$this->code_num('WithdrawFailure');
              return $this->errors($code,__LINE__);
          }
 
@@ -601,7 +584,7 @@ class FinanceController extends CommonController
         $info=$this->financeService->getCoinList(['user_id'=>$this->user_id]);
         //请求失败
         if($info['code'] != 200){
-            $code=$this->code_num('GetMsgFail');
+            $code=$this->code_num('NetworkAnomaly');
             return $this->errors($code,__LINE__);
         }
         //重组币种列表信息
@@ -622,7 +605,7 @@ class FinanceController extends CommonController
         //转至账户
         $roll_in  =['exchange','otc'];
         //当前币种可用余额
-        $roll_out_available=$finance_info['data']['finance_available'];//转出账户可用余额
+        $roll_out_available=$finance_info['data']['finance_available_str'];//转出账户可用余额
         $roll_out_coin_name=$finance_info['data']['coin_name'];//转出账户币种名称
 
         //返回数据
@@ -656,7 +639,7 @@ class FinanceController extends CommonController
             $code=$this->code_num('FinanceEmpty');
             return $this->errors($code,__LINE__);
         }
-        $roll_out_available=$finance_info['data']['finance_available'];//转出账户可用余额
+        $roll_out_available=$finance_info['data']['finance_available_str'];//转出账户可用余额
         $roll_out_coin_name=$finance_info['data']['coin_name'];//转出账户币种名称
 
         //获取其他钱包当前币种信息的请求参数
@@ -684,7 +667,7 @@ class FinanceController extends CommonController
                 }
                 //获取币种信息
                 $finance_data=current($otc_finance['data']['list']);
-                $roll_in_available=$finance_data['finance_available'];//转入账户可用余额
+                $roll_in_available=$finance_data['finance_available_str'];//转入账户可用余额
                 $roll_in_coin_name=$finance_data['coin_name'];       //转入账户币种名称
                 break;
             case 'exchange':
@@ -705,7 +688,7 @@ class FinanceController extends CommonController
                 }
                 //获取币种信息
                 $finance_data=current($exchange_finance['data']['list']);
-                $roll_in_available=$finance_data['finance_amount'];//finance_available//转入账户可用余额
+                $roll_in_available=$finance_data['finance_amount_str'];//finance_available//转入账户可用余额
                 $roll_in_coin_name=$finance_data['coin_name'];//转入账户币种名称
                 break;
             default:
