@@ -64,5 +64,6 @@ return [
     'CoinRoll'             => 7007, //该币禁止划转
     'TransferError'        => 7008, //划转失败
     'AmountError'          => 7009, //划转金额大于可用余额
+    'ValidateError'        => 7010, //验证方式错误
 ];
 

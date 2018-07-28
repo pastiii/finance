@@ -232,7 +232,6 @@ class ExchangeController extends CommonController
         $data=$this->validate($request,[
             'exchange_finance_id' => 'required|int|min:1',
         ]);
-        $finance_id=$data['exchange_finance_id'];
         //当前钱包币种资产信息
         $finance_info=$this->exchangeService->getExchangeFinanceById($data['exchange_finance_id']);
         if(empty($finance_info['data'])){
@@ -250,13 +249,11 @@ class ExchangeController extends CommonController
         $list=[];
         if(!empty($info['data']['list'])){
             foreach ($info['data']['list'] as $value){
-                //默认选中
-                $checked= $finance_id == $value['exchange_finance_id'] ? 1 : 0;
                 $temp=[
                     'exchange_finance_id' => $value['exchange_finance_id'],
                     'coin_id'    => $value['coin_id'],
                     'coin_name'  => $value['coin_name'],
-                    //'checked'    => $checked
+                    'coin_type'  => $value['coin_type']
                 ];
                 array_push($list,$temp);
             }

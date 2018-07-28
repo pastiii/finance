@@ -197,14 +197,17 @@ class FinanceController extends CommonController
                      'finance_history_id'   => $value['finance_history_id'],
                      'created_at'           => date('Y-m-d H:s',$value['created_at']),
                      'coin_name'            => $value['coin_name'],
+                     'coin_image'           => '',//$value['coin_image'],
                      'amount'               => $value['amount'],
                      'finance_history_type' => $value['finance_history_type'],
-                     'status'               => $value['status'],
+                     'status'               => '',//$value['status'],
                  ];
                  array_push($info,$temp);
              }
 
          }
+
+         //测试数据
          for($i=1;$i<5;$i++){
              $temp=[
                  'finance_history_id'   => $i,
@@ -256,7 +259,7 @@ class FinanceController extends CommonController
          $data=$this->validate($request, [
              'finance_id' => 'required|int|min:1',
          ]);
-         //钱包信息
+         //币种信息
          $finance_info=$this->financeService->getFinance($data['finance_id']);
          if(empty($finance_info['data'])){
              $code=$this->code_num('FinanceEmpty');
@@ -268,13 +271,14 @@ class FinanceController extends CommonController
              $code = $this->code_num('NetworkAnomaly');
              return $this->errors($code,__LINE__);
          }*/
-
+         //获取资金密码信息
          $ping_data = $this->userService->getUserPin($this->get_user_info());
-
          $ping_status = 1;
+         //资金密码信息为空
          if(empty($ping_data['data'])){
              $ping_status = 0;
          }
+         //组建输出数据
          $res['finance_available']=1000; //$finance_info['data']['finance_available'];
          $res['coin_status']  = 2;//$coin_info['data']['coin_status'];
          $res['finance_rate'] = 10;//$coin_info['data']['withdraw_fees'];//手续费
@@ -335,6 +339,7 @@ class FinanceController extends CommonController
 
          //二次验证
          if(isset($data['cation_type'])){
+
             if($data['cation_type'] != 'google'){
                 $cation_data=$this->validate($request,[
                     'cation_code' => 'required',
@@ -345,6 +350,7 @@ class FinanceController extends CommonController
                     'cation_code' => 'required'
                 ]);
             }
+            //判断验证方式
             switch ($data['cation_type']){
                 case 'phone':
                     $phone_code = $this->validatePhoneCode($cation_data);
@@ -364,6 +370,9 @@ class FinanceController extends CommonController
                         return $this->errors($google_code,__LINE__);
                     }
                     break;
+                default:
+                    $code = $this->code_num('ValidateError');
+                    return $this->errors($code,__LINE__);
             }
          }else{
              //开启,禁用二次验证判断
@@ -403,9 +412,9 @@ class FinanceController extends CommonController
      * @return int
      */
     public function checkPin($pin){
-
+        //资金密码信息
         $ping_data = $this->userService->getUserPin($this->get_user_info());
-
+        //请求失败或资金密码为空
         if($ping_data['code'] !=200 || empty($ping_data['data'])){
             $code = $this->code_num('GetPinFail');
             return $code;
@@ -539,6 +548,11 @@ class FinanceController extends CommonController
         return true;
     }
 
+    /**
+     * 修改google key
+     * @param $secret string
+     * @return bool
+     */
     private function  editGoogleKey($secret)
     {
         $response = $this->userService->editUserGoogleAuth($secret, $this->user_id);
@@ -566,12 +580,12 @@ class FinanceController extends CommonController
         }
         //获取当前用户钱包币种列表
         $info=$this->financeService->getCoinList(['user_id'=>$this->user_id]);
-
+        //请求失败
         if($info['code'] != 200){
             $code=$this->code_num('GetMsgFail');
             return $this->errors($code,__LINE__);
         }
-
+        //重组币种列表信息
         $list=[];
         if(!empty($info['data']['list'])){
             foreach ($info['data']['list'] as $value){
@@ -586,7 +600,7 @@ class FinanceController extends CommonController
         }
         //转出账户
         $roll_out =['finance'];
-        //转入账户
+        //转至账户
         $roll_in  =['exchange','otc'];
         //当前币种可用余额
         $roll_out_available=$finance_info['data']['finance_available'];//转出账户可用余额
@@ -618,6 +632,7 @@ class FinanceController extends CommonController
         if(!isset($data['roll_in_finance'])) $data['roll_in_finance']='';
         //当前钱包币种资产信息
         $finance_info=$this->financeService->getFinance($data['finance_id']);
+        //返回数据为空
         if(empty($finance_info['data'])){
             $code=$this->code_num('FinanceEmpty');
             return $this->errors($code,__LINE__);
@@ -625,6 +640,7 @@ class FinanceController extends CommonController
         $roll_out_available=$finance_info['data']['finance_available'];//转出账户可用余额
         $roll_out_coin_name=$finance_info['data']['coin_name'];//转出账户币种名称
 
+        //获取其他钱包当前币种信息的请求参数
         $param=[
             'user_id'=> 1, //$this->user_id,
             'coin_id'=> 8 //$finance_info['data']['coin_id']
@@ -635,15 +651,19 @@ class FinanceController extends CommonController
                 //otc钱包当前币种信息
                 /* @var OtcService  $otcService*/
                 $otcService=app(OtcService::class);
+                //获取otc钱包当前币种信息
                 $otc_finance=$otcService->getOtcFinance($param);
+                //请求未成功
                 if($otc_finance['code'] != 200){
                     $code=$this->code_num('NetworkAnomaly');
                     return $this->errors($code,__LINE__);
                 }
+                //返回数据为空
                 if(empty($otc_finance['data']['list'])){
                     $code=$this->code_num('RollError');
                     return $this->errors($code,__LINE__);
                 }
+                //获取币种信息
                 $finance_data=current($otc_finance['data']['list']);
                 $roll_in_available=$finance_data['finance_available'];//转入账户可用余额
                 $roll_in_coin_name=$finance_data['coin_name'];       //转入账户币种名称
@@ -652,23 +672,28 @@ class FinanceController extends CommonController
                 //币币钱包当前币种信息
                 /* @var ExchangeService  $exchangeService*/
                 $exchangeService=app(ExchangeService::class);
+                //获取币币钱包当前币种信息
                 $exchange_finance=$exchangeService->getExchangeFinance($param);
+                //请求未成功
                 if($exchange_finance['code'] != 200){
                     $code=$this->code_num('NetworkAnomaly');
                     return $this->errors($code,__LINE__);
                 }
+                //返回数据为空
                 if(empty($exchange_finance['data']['list'])){
                     $code=$this->code_num('RollError');
                     return $this->errors($code,__LINE__);
                 }
+                //获取币种信息
                 $finance_data=current($exchange_finance['data']['list']);
-                $roll_in_available=$finance_data['finance_amount'];//转入账户可用余额
+                $roll_in_available=$finance_data['finance_amount'];//finance_available//转入账户可用余额
                 $roll_in_coin_name=$finance_data['coin_name'];//转入账户币种名称
                 break;
             default:
                 $roll_in_available =0;
                 $roll_in_coin_name ='';
         }
+        //组建输出数据
         $info=[
             'roll_out_available' => $roll_out_available,
             'roll_out_coin_name' => $roll_out_coin_name,
@@ -678,7 +703,6 @@ class FinanceController extends CommonController
         return $this->response($info, 200);
     }
 
-
      /**
      * 划转
      * @param Request $request
@@ -687,18 +711,18 @@ class FinanceController extends CommonController
     public function financeShift(Request $request)
     {
         $data=$this->validate($request,[
-            //'roll_out_finance'=>'nullable|string|in:finance,otc,exchange',
             'roll_in_finance' =>'required|string|in:otc,exchange',
             'finance_id'      =>'required|int|min:1',
             'amount'          =>'required'
         ]);
         //当前钱包币种资产信息
         $finance_info=$this->financeService->getFinance($data['finance_id']);
+        //返回数据为空
         if(empty($finance_info['data'])){
             $code=$this->code_num('NetworkAnomaly');
             return $this->errors($code,__LINE__);
         }
-        //判断是否可划转
+        //判断该币种是否可划转
         if($finance_info['data']['coin_type'] == 2){
             $code=$this->code_num('CoinRoll');
             return $this->errors($code,__LINE__);
@@ -710,9 +734,10 @@ class FinanceController extends CommonController
         }*/
 
         $coin_id=$finance_info['data']['coin_id'];
-
+        //转至账户
         switch ($data['roll_in_finance']){
             case 'otc':
+                //创建划转记录
                 $res= $this->financeService->financeToOtc($this->user_id,$coin_id,$data['amount']);
                 if($res['code'] != 200){
                     $code=$this->code_num('TransferError');
@@ -720,6 +745,7 @@ class FinanceController extends CommonController
                 }
                 break;
             case 'exchange':
+                //创建划转记录
                 $res= $this->financeService->financeToExchange($this->user_id,$coin_id,$data['amount']);
                 if($res['code'] != 200){
                     $code=$this->code_num('TransferError');
@@ -727,6 +753,7 @@ class FinanceController extends CommonController
                 }
                 break;
             default:
+                //未匹配的转至账户
                 $code=$this->code_num('TransferError');
                 return $this->errors($code,__LINE__);
         }
