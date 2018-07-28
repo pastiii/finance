@@ -464,7 +464,7 @@ class FinanceController extends CommonController
             return $code;
         }
           //验证手机验证码
-          $redis_key = env('PC_PHONE') . $phone_info['data']['phone_number'] . "_" . $data['cation_key'];
+          $redis_key = env('PC_PHONE') .$phone_info['data']['phone_idd'].$phone_info['data']['phone_number'] . "_" . $data['cation_key'];
           //验证邮箱验证码是否过期
           if (empty(redis::get($redis_key))) {
               $code = $this->code_num('VerifyInvalid');
@@ -549,7 +549,6 @@ class FinanceController extends CommonController
         $data=$this->validate($request,[
             'finance_id' => 'required|int|min:1',
         ]);
-        $finance_id=$data['finance_id'];
         //当前钱包币种资产信息
         $finance_info=$this->financeService->getFinance($data['finance_id']);
         if(empty($finance_info['data'])){
@@ -567,13 +566,11 @@ class FinanceController extends CommonController
         $list=[];
         if(!empty($info['data']['list'])){
             foreach ($info['data']['list'] as $value){
-                //默认选中
-                $checked= $finance_id == $value['finance_id'] ? 1 : 0;
                 $temp=[
                    'finance_id' => $value['finance_id'],
                    'coin_id'    => $value['coin_id'],
                    'coin_name'  => $value['coin_name'],
-                   //'checked'    => $checked
+                   'coin_type'  => $value['coin_type']
                 ];
                 array_push($list,$temp);
             }
