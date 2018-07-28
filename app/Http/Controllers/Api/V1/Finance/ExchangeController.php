@@ -98,7 +98,7 @@ class ExchangeController extends CommonController
         if(!isset($data['page'])) $data['page']=1;
         $data['user_id']=$this->user_id;
         //获取用户币币交易资产信息列表
-        $list= $this->exchangeService->getExchangeFinanceList($data);
+        $list= $this->exchangeService->getExchangeFinanceList(['user_id'=>1]);
 
         if($list['code'] != 200){
             $code=$this->code_num('GetMsgFail');
@@ -122,21 +122,6 @@ class ExchangeController extends CommonController
                 array_push($info,$temp);
             }
         }
-        for($i=1;$i<5;$i++){
-            $temp=[
-                'exchange_finance_id'      => $i,
-                'coin_id'             => $i,
-                'coin_name'           => 'ETH',
-                'coin_type'           => 1,
-                'coin_image'          => '',
-                'finance_available'   => $i*10,
-                'finance_amount'      => $i*10,
-                'finance_amount_rmb'  => '0.0',
-                'frozen_capital'      => '10.0'
-            ];
-            array_push($info,$temp);
-        }
-
         $res['list']= $info;
         $res['page']= $list['data']['page'];
 
