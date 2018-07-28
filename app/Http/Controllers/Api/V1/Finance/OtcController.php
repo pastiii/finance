@@ -91,7 +91,7 @@ class OtcController extends CommonController
         $data=$this->validate($request, [
             'coin_name' => 'nullable|string'
         ]);
-        $data['user_id']=$this->user_id;
+        $data['user_id']=1;//$this->user_id;
         //获取用户OTC资产信息列表
         $list= $this->otcService->getOtcFinanceList($data);
 
@@ -102,15 +102,15 @@ class OtcController extends CommonController
         //数据重组
         $info=[];
         if(!empty($list['data']['list'])){
-            foreach ($list['data']['list'] as $k=>$value){
+            foreach ($list['data']['list'] as $value){
                 $temp=[
                     'otc_finance_id'      => $value['otc_finance_id'],
                     'coin_id'             => $value['coin_id'],
                     'coin_name'           => $value['coin_name'],
                     'coin_type'           => $value['coin_type'],
                     'coin_image'          => '',
-                    'finance_available'   => $k,//$value['finance_available_str'],
-                    'finance_amount'      => $k,//$value['finance_amount_str'],
+                    'finance_available'   => $value['finance_available_str'],
+                    'finance_amount'      => $value['finance_amount_str'],
                     'finance_amount_rmb'  => '0.0',
                     'frozen_capital'      => '0.0'
                 ];
