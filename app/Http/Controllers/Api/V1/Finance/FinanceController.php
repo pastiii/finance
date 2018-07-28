@@ -92,8 +92,6 @@ class FinanceController extends CommonController
      public function getFinanceList(Request $request)
      {
          $data=$this->validate($request, [
-             /*'limit'   => 'required|int|min:1',
-             'page'    => 'required|int|min:1',*/
              'coin_name' => 'nullable|string'
          ]);
 
@@ -201,9 +199,9 @@ class FinanceController extends CommonController
      public function getFinanceHistoryList(Request $request)
      {
          $data=$this->validate($request, [
+             'coin_id' => 'required|int|min:1',
              'limit'   => 'nullable|int|min:1',
-             'page'    => 'nullable|int|min:1',
-             'finance_id' => 'required|int|min:1'
+             'page'    => 'nullable|int|min:1'
          ]);
          $data['user_id']=$this->user_id;
          if(!isset($data['limit']))  $data['limit']=10;
@@ -219,33 +217,27 @@ class FinanceController extends CommonController
          //重组数据
          $info=[];
          if(!empty($list['data']['list'])){
+
+             $coin_info=$this->financeService->getCoin($data['coin_id']);
+             if(empty($coin_info['data'])){
+                 $coin_image='';
+             }else{
+                 $coin_image=$coin_info['data']['coin_image'];
+             }
              foreach ($list['data']['list'] as $value){
                  $temp=[
                      'finance_history_id'   => $value['finance_history_id'],
                      'created_at'           => date('Y-m-d H:s',$value['created_at']),
                      'coin_name'            => $value['coin_name'],
-                     'coin_image'           => '',//$value['coin_image'],
-                     'amount'               => $value['amount'],
+                     'coin_image'           => $coin_image,
+                     'amount'               => $value['amount_str'],
                      'finance_history_type' => $value['finance_history_type'],
-                     'status'               => '',//$value['status'],
+                     'status'               => 1,//$value['status'],
                  ];
                  array_push($info,$temp);
              }
-
          }
 
-         //测试数据
-         for($i=1;$i<5;$i++){
-             $temp=[
-                 'finance_history_id'   => $i,
-                 'created_at'           => date('Y-m-d H:s',time()),
-                 'coin_name'            => 'ETH',
-                 'amount'               => 100,
-                 'finance_history_type' => $i,
-                 'status'               => 1,
-             ];
-             array_push($info,$temp);
-         }
          $res['list']= $info;
          $res['page']=$list['data']['page'];
 
@@ -293,7 +285,7 @@ class FinanceController extends CommonController
              return $this->errors($code,__LINE__);
          }
          //获取币种信息
-         $coin_info =$this->financeService->getCoin(2);//$finance_info['data']['coin_id']
+         $coin_info =$this->financeService->getCoin($finance_info['data']['coin_id']);
          if(empty($coin_info['data'])){
              $code = $this->code_num('NetworkAnomaly');
              return $this->errors($code,__LINE__);
