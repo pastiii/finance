@@ -108,7 +108,11 @@ class FinanceController extends CommonController
          //重组数据
          $info=[];
          if(!empty($list['data']['list'])){
-             foreach ($list['data']['list'] as $value){
+             foreach ($list['data']['list'] as $k=>$value){
+                 if($k==1) {
+                     $value['finance_available_str'] =0;
+                     $value['finance_amount_str']=0;
+                 }
                  $temp=[
                      'finance_id' => $value['finance_id'],
                      'coin_id'    => $value['coin_id'],
