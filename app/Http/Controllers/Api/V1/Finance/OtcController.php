@@ -89,8 +89,6 @@ class OtcController extends CommonController
     public function getOtcFinanceList(Request $request)
     {
         $data=$this->validate($request, [
-            'limit'   => 'required|int|min:1',
-            'page'    => 'required|int|min:1',
             'coin_name' => 'nullable|string'
         ]);
         $data['user_id']=$this->user_id;
