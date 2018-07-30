@@ -234,8 +234,7 @@ class FinanceController extends CommonController
                      'coin_name'            => $value['coin_name'],
                      'coin_image'           => $coin_image,
                      'amount'               => $value['amount_str'],
-                     'finance_history_type' => $value['finance_history_type'],
-                     'status'               => 1,//$value['status'],
+                     'finance_history_type' => $value['finance_history_type']
                  ];
                  array_push($info,$temp);
              }
