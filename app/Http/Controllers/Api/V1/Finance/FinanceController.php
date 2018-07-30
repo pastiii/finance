@@ -129,8 +129,12 @@ class FinanceController extends CommonController
                  }
                  //虚拟币与美元汇率信息
                  $coin_to_usd=$this->coinRate($value['coin_name']);
-                 //虚拟币转换为美元
-                 $usd_amount=$value['finance_amount_str']/$coin_to_usd;
+                 if(!empty($coin_to_usd)){
+                     //虚拟币转换为美元
+                     $usd_amount=$value['finance_amount_str']/$coin_to_usd;
+                 }else{
+                     $usd_amount=0;
+                 }
                  //美元转换为人民币
                  $finance_amount_rmb=$usd_amount*$exchange_rate;
 
@@ -805,8 +809,10 @@ class FinanceController extends CommonController
             foreach ($list['data']['list'] as $value){
                 //虚拟币与美元汇率信息
                 $coin_to_usd=$this->coinRate($value['coin_name']);
-                //虚拟币转换为美元
-                $usd_amount+=$value['finance_amount_str']/$coin_to_usd;
+                if(!empty($coin_to_usd)){
+                    //虚拟币转换为美元
+                    $usd_amount+=$value['finance_amount_str']/$coin_to_usd;
+                }
             }
         }
         //总资产折合USDT
