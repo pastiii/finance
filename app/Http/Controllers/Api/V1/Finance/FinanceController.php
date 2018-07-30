@@ -819,7 +819,7 @@ class FinanceController extends CommonController
             'code'=>$code,
             'data'=>[
                 'usd_amount'  =>round($usd_amount,2),
-                'usdt_amount' =>round($usdt_amount,2),
+                'usdt_amount' =>round($usdt_amount,6),
                 'cny_amount'  =>round($cny_amount,2)
             ],
         ];
