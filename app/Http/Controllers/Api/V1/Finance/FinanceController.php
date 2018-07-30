@@ -412,7 +412,7 @@ class FinanceController extends CommonController
              'coin_name'   =>$finance_info['data']['coin_name'],
              'coin_type'   =>$finance_info['data']['coin_type'],
              'destination_addr'        =>$data['destination_addr'],
-             'finance_withdraw_amount' =>intval($data['withdraw_amount']),
+             'finance_withdraw_amount' =>floatval($data['withdraw_amount']),
              'finance_withdraw_amount_str' =>$data['withdraw_amount'],
              'finance_withdraw_status' =>1
          ];
