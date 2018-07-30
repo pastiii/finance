@@ -2,7 +2,7 @@
 
 function build_docker {
     TAG=$1
-    IMAGE_NAME="$DOCKER_REP/platformphp/user"
+    IMAGE_NAME="$DOCKER_REP/platformphp/finance"
     IMAGE_FULL_NAME="$IMAGE_NAME:$TAG"
     IMAGE_LATEST_NAME="$IMAGE_NAME:latest"
 
