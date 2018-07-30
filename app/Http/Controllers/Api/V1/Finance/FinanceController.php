@@ -74,14 +74,20 @@ class FinanceController extends CommonController
         //账号信息获取
         $email = $this->userService->getUserEmailById($this->user_id);
         $phone = $this->userService->getUserPhone($this->user_id);
+        //统计总资产
+        $amount=$this->amount();
+
+        if($amount['code'] != 200){
+            return $this->errors($amount['code'], __LINE__);
+        }
         //数据处理
         $data['email']            = empty($email['data']) ? "" : $email['data']['email'];
         $data['phone']            = empty($phone['data']) ? "" : $phone['data']['phone_number'];
         $data['name']             = $user['user_name'];
         $data['last_login_time']  = isset($last_login['data']['list']) ? date('Y-m-d H:i:s', $last_login['data']['list'][0]['created_at']) : '';
-        $data['finance_usdt']= 0;
-        $data['finance_rmb']=0;
-        $data['finance_us']=0;
+        $data['finance_usdt']= $amount['data']['usdt_amount'];
+        $data['finance_rmb'] = $amount['data']['cny_amount'];
+        $data['finance_us']  = $amount['data']['usd_amount'];
         return $this->response($data, 200);
     }
 
@@ -109,6 +115,8 @@ class FinanceController extends CommonController
              $coin_name=strtoupper($data['coin_name']);
              $list['data']['list']=$this->collection($list['data']['list'],$coin_name);
          }
+         //获取美元对人民币汇率
+         $exchange_rate=$this->exchangeRate();
          //重组数据
          $info=[];
          if(!empty($list['data']['list'])){
@@ -119,6 +127,13 @@ class FinanceController extends CommonController
                  }else{
                      $coin_image=$coin_info['data']['coin_image'];
                  }
+                 //虚拟币与美元汇率信息
+                 $coin_to_usd=$this->coinRate($value['coin_name']);
+                 //虚拟币转换为美元
+                 $usd_amount=$value['finance_amount_str']/$coin_to_usd;
+                 //美元转换为人民币
+                 $finance_amount_rmb=$usd_amount*$exchange_rate;
+
                  $temp=[
                      'finance_id' => $value['finance_id'],
                      'coin_id'    => $value['coin_id'],
@@ -127,7 +142,7 @@ class FinanceController extends CommonController
                      'coin_image' => $coin_image,
                      'finance_available' =>$value['finance_available_str'],
                      'finance_amount' =>$value['finance_amount_str'],
-                     'finance_amount_rmb' => '0.0'
+                     'finance_amount_rmb' =>round($finance_amount_rmb,2)
                  ];
                  array_push($info,$temp);
              }
@@ -766,6 +781,48 @@ class FinanceController extends CommonController
         }
 
         return $this->response('ok', 200);
+    }
+
+    /**
+     * 统计钱包现有资产
+     * return array
+    */
+    public function amount()
+    {
+        //获取用户资产信息列表
+        $list= $this->financeService->getFinanceList(['user_id'=>$this->user_id]);
+        $code=200;
+        if($list['code'] != 200){
+            $code=$this->code_num('NetworkAnomaly');
+        }
+        //获取美元对人民币汇率
+        $exchange_rate=$this->exchangeRate();
+        //获取美元对USDT汇率
+        $usd_to_usdt=$this->coinRate('USDT');
+
+        //总资产折合USD
+        $usd_amount = 0;
+        if(!empty($list['data']['list'])){
+            foreach ($list['data']['list'] as $value){
+                //虚拟币与美元汇率信息
+                $coin_to_usd=$this->coinRate($value['coin_name']);
+                //虚拟币转换为美元
+                $usd_amount+=$value['finance_amount_str']/$coin_to_usd;
+            }
+        }
+        //总资产折合USDT
+        $usdt_amount=$usd_amount*$usd_to_usdt;
+        //总资产折合CNY
+        $cny_amount =$usd_amount*$exchange_rate;
+
+        return [
+            'code'=>$code,
+            'data'=>[
+                'usd_amount'  =>round($usd_amount,2),
+                'usdt_amount' =>round($usdt_amount,2),
+                'cny_amount'  =>round($cny_amount,2)
+            ],
+        ];
     }
 
 

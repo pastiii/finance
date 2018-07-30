@@ -16,12 +16,14 @@ class FinanceService
      protected $financeService;
      protected $countryBaseUrl;
      protected $transferBaseUrl;
+     protected $exchangeRateUrl;
 
      public function __construct()
      {
-         $this->financeService= env('FINANCE_BASE_URL');
-         $this->countryBaseUrl    = env('COMMON_COUNTRY_URL');
+         $this->financeService  = env('FINANCE_BASE_URL');
+         $this->countryBaseUrl  = env('COMMON_COUNTRY_URL');
          $this->transferBaseUrl = env('TRANSFER_BASE_URL');
+         $this->exchangeRateUrl = env('EXCHANGE_RATE_URL');
      }
 
     /**
@@ -209,4 +211,25 @@ class FinanceService
         $url = "finance/to_exchange/user_id/{$user_id}/coin_id/{$coin_id}";
         return $this->send_request($url, 'post',['amount'=>$amount],$this->transferBaseUrl);
     }
+
+    /**
+     * 获取美元汇率
+     * @return array
+    */
+    public function exchange()
+    {
+        $url = "exchange";
+        return $this->send_request($url, 'get',[],$this->exchangeRateUrl);
+    }
+
+    /**
+     * 虚拟币与美元汇率信息
+     * @return array
+     */
+    public function coin()
+    {
+        $url = "coin";
+        return $this->send_request($url, 'get',[],$this->exchangeRateUrl);
+    }
+
 }

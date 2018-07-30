@@ -7,6 +7,7 @@ use App\Services\SecurityVerificationService;
 use App\Services\MessageTemplateService;
 use Illuminate\Http\Request;
 use App\Services\UserService;
+use App\Services\FinanceService;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -228,4 +229,38 @@ class CommonController extends BaseController
         $res=  $collection->where('coin_name', $coin_name);
         return $res;
     }
+
+    public function exchangeRate($exchange_name='CNY')
+    {
+        /* @var FinanceService  $financeService*/
+        $financeService=app(FinanceService::class);
+        $exchange_rate=$financeService->exchange();
+        if($exchange_rate['code'] != 200){
+            return 0;
+        }
+        $collection=collect($exchange_rate['data']['data']['rates']);
+        $res=$collection->get($exchange_name);
+        if(empty($res)){
+            return 0;
+        }
+        return $res;
+    }
+
+    public function coinRate($coin_name)
+    {
+        /* @var FinanceService  $financeService*/
+        $financeService=app(FinanceService::class);
+        $coin_rate=$financeService->coin();
+        if($coin_rate['code'] != 200){
+            return 0;
+        }
+        $collection=collect($coin_rate['data']['data']['quotes']);
+        $res=$collection->get($coin_name);
+        if(empty($res)){
+            return 0;
+        }
+        return $res;
+    }
+
+
 }
