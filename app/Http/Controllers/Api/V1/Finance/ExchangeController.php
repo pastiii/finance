@@ -278,7 +278,7 @@ class ExchangeController extends CommonController
             $code=$this->code_num('FinanceEmpty');
             return $this->errors($code,__LINE__);
         }
-        $roll_out_available=$finance_info['data']['finance_amount'];//转出账户可用余额
+        $roll_out_available=1000.1;//$finance_info['data']['finance_amount'];//转出账户可用余额
         $roll_out_coin_name=$finance_info['data']['coin_name'];//转出账户币种名称
 
         $param=[
