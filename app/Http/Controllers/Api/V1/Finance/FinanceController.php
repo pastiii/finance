@@ -129,8 +129,12 @@ class FinanceController extends CommonController
                  }
                  //虚拟币与美元汇率信息
                  $coin_to_usd=$this->coinRate($value['coin_name']);
-                 //虚拟币转换为美元
-                 $usd_amount=$value['finance_amount_str']/$coin_to_usd;
+                 if(!empty($coin_to_usd)){
+                     //虚拟币转换为美元
+                     $usd_amount=$value['finance_amount_str']/$coin_to_usd;
+                 }else{
+                     $usd_amount=0;
+                 }
                  //美元转换为人民币
                  $finance_amount_rmb=$usd_amount*$exchange_rate;
 
@@ -280,7 +284,7 @@ class FinanceController extends CommonController
          $data=$this->validate($request, [
              'finance_id' => 'required|int|min:1',
          ]);
-         //币种信息
+         //资金信息
          $finance_info=$this->financeService->getFinance($data['finance_id']);
          if(empty($finance_info['data'])){
              $code=$this->code_num('FinanceEmpty');
@@ -412,7 +416,7 @@ class FinanceController extends CommonController
              'coin_name'   =>$finance_info['data']['coin_name'],
              'coin_type'   =>$finance_info['data']['coin_type'],
              'destination_addr'        =>$data['destination_addr'],
-             'finance_withdraw_amount' =>intval($data['withdraw_amount']),
+             'finance_withdraw_amount' =>floatval($data['withdraw_amount']),
              'finance_withdraw_amount_str' =>$data['withdraw_amount'],
              'finance_withdraw_status' =>1
          ];
@@ -424,7 +428,7 @@ class FinanceController extends CommonController
              return $this->errors($code,__LINE__);
          }
 
-         return $this->response($res['data'], 200);
+         return $this->response('', 200);
      }
 
     /**
@@ -805,8 +809,10 @@ class FinanceController extends CommonController
             foreach ($list['data']['list'] as $value){
                 //虚拟币与美元汇率信息
                 $coin_to_usd=$this->coinRate($value['coin_name']);
-                //虚拟币转换为美元
-                $usd_amount+=$value['finance_amount_str']/$coin_to_usd;
+                if(!empty($coin_to_usd)){
+                    //虚拟币转换为美元
+                    $usd_amount+=$value['finance_amount_str']/$coin_to_usd;
+                }
             }
         }
         //总资产折合USDT
