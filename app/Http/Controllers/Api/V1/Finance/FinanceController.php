@@ -340,10 +340,10 @@ class FinanceController extends CommonController
              return $this->errors($code,__LINE__);
          }
          //判断币种是否正常
-        /* if($coin_info['data']['coin_status'] != 2){
+         if($coin_info['data']['coin_status'] != 2){
              $code = $this->code_num('CoinStatus');
              return $this->errors($code,__LINE__);
-         }*/
+         }
          //判断提现金额是否大于单次限制金额
          if($data['withdraw_amount'] > $coin_info['data']['withdrawone_max_str']){
              $code=$this->code_num('WithdrawOneMax');
