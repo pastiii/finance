@@ -325,7 +325,7 @@ class ExchangeController extends CommonController
                 $roll_in_coin_name ='';
         }
         $info=[
-            'roll_out_available' => $roll_out_available,
+            'roll_out_available' => 1000.1,//$roll_out_available,
             'roll_out_coin_name' => $roll_out_coin_name,
             'roll_in_available'  => $roll_in_available,
             'roll_in_coin_name'  => $roll_in_coin_name
