@@ -90,12 +90,8 @@ class ExchangeController extends CommonController
     public function getExchangeFinanceList(Request $request)
     {
         $data=$this->validate($request, [
-            'limit'   => 'nullable|int|min:1',
-            'page'    => 'nullable|int|min:1',
             'coin_name' => 'nullable|int|min:1'
         ]);
-        if(!isset($data['limit'])) $data['limit']=10;
-        if(!isset($data['page'])) $data['page']=1;
         $data['user_id']=1;//$this->user_id;
         //获取用户币币交易资产信息列表
         $list= $this->exchangeService->getExchangeFinanceList($data);
@@ -107,15 +103,15 @@ class ExchangeController extends CommonController
         //数据重组
         $info=[];
         if(!empty($list['data']['list'])){
-            foreach ($list['data']['list'] as $value){
+            foreach ($list['data']['list'] as $k=>$value){
                 $temp=[
                     'exchange_finance_id'      => $value['exchange_finance_id'],
                     'coin_id'             => $value['coin_id'],
                     'coin_name'           => $value['coin_name'],
                     'coin_type'           => $value['coin_type'],
                     'coin_image'          => '',
-                    'finance_available'   => $value['finance_amount'],
-                    'finance_amount'      => $value['finance_amount_str'],
+                    'finance_available'   => $k*100,//$value['finance_amount_str'],
+                    'finance_amount'      => $k*100,//$value['finance_amount_str'],
                     'finance_amount_rmb'  => '0.0',
                     'frozen_capital'      => '0.0'
                 ];

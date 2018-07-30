@@ -59,10 +59,7 @@ class ExchangeService
         }
         //分页信息
         $page_info['count']=$count['data']['count'];//总数量
-        $page_info['current_page'] = intval($data['page']);//当前页
-        $page_info['total_page'] =  ceil($count['data']['count']/$data['limit']);//每页显示数量
 
-        $data['start']=($data['page']-1)*$data['limit'];
         $url = "exchange/exchange_finance?".http_build_query($data);
         $list = $this->send_request($url, 'get',[],$this->exchangeService);
 
@@ -79,8 +76,6 @@ class ExchangeService
      */
     public function getExchangeFinanceCount($data)
     {
-        unset($data['limit']);
-        unset($data['page']);
         $url = "exchange/exchange_finance/count?".http_build_query($data);
         return $this->send_request($url, 'get',[],$this->exchangeService);
     }
