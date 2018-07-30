@@ -230,6 +230,11 @@ class CommonController extends BaseController
         return $res;
     }
 
+    /**
+     * 获取美元汇率
+     * @param $exchange_name string
+     * @return float
+     */
     public function exchangeRate($exchange_name='CNY')
     {
         /* @var FinanceService  $financeService*/
@@ -246,6 +251,11 @@ class CommonController extends BaseController
         return $res;
     }
 
+    /**
+     * 虚拟币与美元汇率信息
+     * @param $coin_name string
+     * @return float
+     */
     public function coinRate($coin_name)
     {
         /* @var FinanceService  $financeService*/
@@ -255,6 +265,7 @@ class CommonController extends BaseController
             return 0;
         }
         $collection=collect($coin_rate['data']['data']['quotes']);
+        //获取当前币种美元汇率
         $res=$collection->get($coin_name);
         if(empty($res)){
             return 0;

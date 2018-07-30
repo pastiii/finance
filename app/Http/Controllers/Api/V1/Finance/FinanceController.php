@@ -280,7 +280,7 @@ class FinanceController extends CommonController
          $data=$this->validate($request, [
              'finance_id' => 'required|int|min:1',
          ]);
-         //币种信息
+         //资金信息
          $finance_info=$this->financeService->getFinance($data['finance_id']);
          if(empty($finance_info['data'])){
              $code=$this->code_num('FinanceEmpty');
@@ -424,7 +424,7 @@ class FinanceController extends CommonController
              return $this->errors($code,__LINE__);
          }
 
-         return $this->response($res['data'], 200);
+         return $this->response('', 200);
      }
 
     /**
