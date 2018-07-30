@@ -221,7 +221,7 @@ class OtcController extends CommonController
             return $this->errors($code,__LINE__);
         }
         //获取当前用户钱包币种列表
-        $info=$this->otcService->getCoinList(['user_id'=>$this->user_id]);
+        $info=$this->otcService->getCoinList(['user_id'=>1]);
 
         if($info['code'] != 200){
             $code=$this->code_num('GetMsgFail');
