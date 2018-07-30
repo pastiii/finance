@@ -104,6 +104,11 @@ class FinanceController extends CommonController
              $code=$this->code_num('NetworkAnomaly');
              return $this->errors($code,__LINE__);
          }
+         //币种名搜索
+         if(isset($data['coin_name']) && !empty($data['coin_name'])){
+             $coin_name=strtoupper($data['coin_name']);
+             $list['data']['list']=$this->collection($list['data']['list'],$coin_name);
+         }
          //重组数据
          $info=[];
          if(!empty($list['data']['list'])){

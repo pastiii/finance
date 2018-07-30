@@ -215,4 +215,17 @@ class CommonController extends BaseController
         }
         return true;
     }
+
+    /*
+     *数据处理
+     * @param $data array
+     * @param $coin_name
+     * return array
+    */
+    public function collection($data,$coin_name)
+    {
+        $collection= collect($data);
+        $res=  $collection->where('coin_name', $coin_name);
+        return $res;
+    }
 }
