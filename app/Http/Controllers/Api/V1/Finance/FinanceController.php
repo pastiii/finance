@@ -657,7 +657,7 @@ class FinanceController extends CommonController
             case 'otc':
                 //otc钱包当前币种信息
                 /* @var OtcService  $otcService*/
-                $otcService=app(OtcService::class);
+                /*$otcService=app(OtcService::class);
                 //获取otc钱包当前币种信息
                 $otc_finance=$otcService->getOtcFinance($param);
                 //请求未成功
@@ -673,12 +673,12 @@ class FinanceController extends CommonController
                 //获取币种信息
                 $finance_data=current($otc_finance['data']['list']);
                 $roll_in_available=$finance_data['finance_available_str'];//转入账户可用余额
-                $roll_in_coin_name=$finance_data['coin_name'];       //转入账户币种名称
+                $roll_in_coin_name=$finance_data['coin_name'];       //转入账户币种名称*/
                 break;
             case 'exchange':
                 //币币钱包当前币种信息
                 /* @var ExchangeService  $exchangeService*/
-                $exchangeService=app(ExchangeService::class);
+                /*$exchangeService=app(ExchangeService::class);
                 //获取币币钱包当前币种信息
                 $exchange_finance=$exchangeService->getExchangeFinance($param);
                 //请求未成功
@@ -694,7 +694,7 @@ class FinanceController extends CommonController
                 //获取币种信息
                 $finance_data=current($exchange_finance['data']['list']);
                 $roll_in_available=$finance_data['finance_amount_str'];//finance_available//转入账户可用余额
-                $roll_in_coin_name=$finance_data['coin_name'];//转入账户币种名称
+                $roll_in_coin_name=$finance_data['coin_name'];//转入账户币种名称*/
                 break;
             default:
                 $roll_in_available =0;
@@ -704,8 +704,8 @@ class FinanceController extends CommonController
         $info=[
             'roll_out_available' => $roll_out_available,
             'roll_out_coin_name' => $roll_out_coin_name,
-            'roll_in_available'  => $roll_in_available,
-            'roll_in_coin_name'  => $roll_in_coin_name
+            'roll_in_available'  => 0,//$roll_in_available,
+            'roll_in_coin_name'  => $roll_out_coin_name//$roll_in_coin_name
         ];
         return $this->response($info, 200);
     }
@@ -760,7 +760,7 @@ class FinanceController extends CommonController
                 }
                 break;
             default:
-                //未匹配的转至账户
+                //未匹配到转至账户
                 $code=$this->code_num('TransferError');
                 return $this->errors($code,__LINE__);
         }
