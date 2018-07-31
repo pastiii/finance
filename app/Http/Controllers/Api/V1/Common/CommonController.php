@@ -169,14 +169,9 @@ class CommonController extends BaseController
     protected function checkTwoStatus()
     {
         $info = '';
-        $this->getUserService();
-        //开启,禁用二次验证判断
-        $redis_key = env('PC_STATUS') . "user_" . $this->user_id;
-        if (empty(Redis::get($redis_key))) {
-            $user_status = $this->userService->getUserStatus($this->user_id);
-            if (!empty($user_status['data'])) {
-                $info = $this->userService->bindingInfo($user_status, $this->user_id);
-            }
+        $user_status = $this->userService->getUserStatus($this->user_id);
+        if (!empty($user_status['data'])) {
+            $info = $this->userService->bindingInfo($user_status, $this->user_id);
         }
         return $info;
     }
