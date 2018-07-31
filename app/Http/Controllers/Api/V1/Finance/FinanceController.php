@@ -199,11 +199,12 @@ class FinanceController extends CommonController
              "coin_name"=>$finance_info['data']['coin_name'],
              "coin_type"=>$finance_info['data']['coin_type']
          ];
+
          //获取地址信息
          $info=$this->financeService->createFinanceWallet($param);
 
          if(empty($info['data'])){
-             $code=$this->code_num('InfoEmpty');
+             $code=$this->code_num('WalletEmpty');
              return $this->errors($code,__LINE__);
          }
 
@@ -428,6 +429,7 @@ class FinanceController extends CommonController
              'destination_addr'        =>$data['destination_addr'],
              'finance_withdraw_amount' =>floatval($data['withdraw_amount']),
              'finance_withdraw_amount_str' =>$data['withdraw_amount'],
+             'finance_withdraw_fees'   =>$coin_info['data']['withdraw_fees'],
              'finance_withdraw_status' =>1
          ];
          //创建提现记录
