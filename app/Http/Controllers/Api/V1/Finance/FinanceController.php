@@ -76,7 +76,7 @@ class FinanceController extends CommonController
         $phone = $this->userService->getUserPhone($this->user_id);
 
         //统计总资产
-       return $amount=$this->amount();
+        $amount=$this->amount();
 
         if($amount['code'] != 200){
             return $this->errors($amount['code'], __LINE__);
