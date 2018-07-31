@@ -102,7 +102,12 @@ class FinanceController extends CommonController
          $data=$this->validate($request, [
              'coin_name' => 'nullable|string'
          ]);
-
+         $redis_key = "finance_amount_status_user_" . $this->user_id;
+         if(empty(Redis::get($redis_key))){
+             $amount_status='true';
+         }else{
+             $amount_status=Redis::get($redis_key);
+         }
          $data['user_id']=$this->user_id;
          //获取用户资产信息列表
          $list= $this->financeService->getFinanceList($data);
@@ -122,12 +127,6 @@ class FinanceController extends CommonController
          $info=[];
          if(!empty($list['data']['list'])){
              foreach ($list['data']['list'] as $value){
-                 $coin_info=$this->financeService->getCoin($value['coin_id']);
-                 if(empty($coin_info['data'])){
-                     $coin_image='';
-                 }else{
-                     $coin_image=$coin_info['data']['coin_image'];
-                 }
                  //虚拟币与美元汇率信息
                  $coin_to_usd=$this->coinRate($value['coin_name']);
                  if(!empty($coin_to_usd)){
@@ -144,7 +143,7 @@ class FinanceController extends CommonController
                      'coin_id'    => $value['coin_id'],
                      'coin_name'  => $value['coin_name'],
                      'coin_type'  => $value['coin_type'],
-                     'coin_image' => $coin_image,
+                     'coin_image' => $value['coin_name'],
                      'finance_available' =>$value['finance_available_str'],
                      'finance_amount' =>$value['finance_amount_str'],
                      'finance_amount_rmb' =>round($finance_amount_rmb,2)
@@ -153,9 +152,25 @@ class FinanceController extends CommonController
              }
          }
          $res['list']= $info;
+         $res['amount_status']=$amount_status;
          $res['page']=$list['data']['page'];
 
          return $this->response($res, 200);
+     }
+
+     /**
+      *设置资金显示状态
+      * @param Request $request
+      * return array
+     */
+     public function setAmountStatus(Request $request)
+     {
+         $data=$this->validate($request,[
+             'amount_status' => 'required|string|in:true,false'
+         ]);
+         $redis_key = "finance_amount_status_user_" . $this->user_id;
+         redis::setex($redis_key, 600, $data['amount_status']);
+         return $this->response('', 200);
      }
 
      /**
@@ -226,18 +241,12 @@ class FinanceController extends CommonController
          //重组数据
          $info=[];
          if(!empty($list['data']['list'])){
-             $coin_info=$this->financeService->getCoin($data['coin_id']);
-             if(empty($coin_info['data'])){
-                 $coin_image='';
-             }else{
-                 $coin_image=$coin_info['data']['coin_image'];
-             }
              foreach ($list['data']['list'] as $value){
                  $temp=[
                      'finance_history_id'   => $value['finance_history_id'],
                      'created_at'           => date('Y-m-d H:s',$value['created_at']),
                      'coin_name'            => $value['coin_name'],
-                     'coin_image'           => $coin_image,
+                     'coin_image'           => $value['coin_name'],
                      'amount'               => $value['amount_str'],
                      'finance_history_type' => $value['finance_history_type']
                  ];
@@ -248,7 +257,7 @@ class FinanceController extends CommonController
          $res['list']= $info;
          $res['page']=$list['data']['page'];
 
-         return $this->response($res, 200);;
+         return $this->response($res, 200);
 
      }
 
