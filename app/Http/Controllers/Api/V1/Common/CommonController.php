@@ -240,7 +240,7 @@ class CommonController extends BaseController
         /* @var FinanceService  $financeService*/
         $financeService=app(FinanceService::class);
         $exchange_rate=$financeService->exchange();
-        if($exchange_rate['code'] != 200){
+        if($exchange_rate['data']['code'] != 200){
             return 0;
         }
         $collection=collect($exchange_rate['data']['data']['rates']);
@@ -261,7 +261,7 @@ class CommonController extends BaseController
         /* @var FinanceService  $financeService*/
         $financeService=app(FinanceService::class);
         $coin_rate=$financeService->coin();
-        if($coin_rate['code'] != 200){
+        if($coin_rate['data']['code'] != 200){
             return 0;
         }
         $collection=collect($coin_rate['data']['data']['quotes']);
@@ -272,6 +272,5 @@ class CommonController extends BaseController
         }
         return $res;
     }
-
 
 }
