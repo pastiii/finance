@@ -89,7 +89,7 @@ class FinanceService
      */
      public function getFinanceWallet($data)
      {
-         $url = "finance/finance_wallet/id/".$data['finance_wallet_id'];
+         $url = "finance/finance_wallet?".http_build_query($data);
          return $this->send_request($url, 'get',[],$this->financeService);
      }
 

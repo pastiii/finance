@@ -191,25 +191,43 @@ class FinanceController extends CommonController
              $code=$this->code_num('FinanceEmpty');
              return $this->errors($code,__LINE__);
          }
-
-         $param= [
-             "user_id"  =>$this->user_id,
-             "user_name"=>$user['user_name'],
-             "coin_id"  =>$finance_info['data']['coin_id'],
-             "coin_name"=>$finance_info['data']['coin_name'],
-             "coin_type"=>$finance_info['data']['coin_type']
+         $Wallet_param=[
+             'user_id'=>$this->user_id,
+             'coin_id'       =>$finance_info['data']['coin_id']
          ];
 
-         //获取地址信息
-         $info=$this->financeService->createFinanceWallet($param);
+         $Wallet=$this->financeService->getFinanceWallet($Wallet_param);
 
-         if(empty($info['data'])){
-             $code=$this->code_num('WalletEmpty');
+         if($Wallet['code'] != 200){
+             $code=$this->code_num('WalletError');
              return $this->errors($code,__LINE__);
          }
+         if(empty($Wallet['data']['list'])){
+             $param= [
+                 "user_id"  =>$this->user_id,
+                 "user_name"=>$user['user_name'],
+                 "coin_id"  =>$finance_info['data']['coin_id'],
+                 "coin_name"=>$finance_info['data']['coin_name'],
+                 "coin_type"=>$finance_info['data']['coin_type']
+             ];
 
-         $res['wallet_addr']=$info['data']['wallet_addr'];
-         $res['qr_msg']=base64_encode($info['data']['wallet_addr']);
+             //获取地址信息
+             $info=$this->financeService->createFinanceWallet($param);
+
+             if(empty($info['data'])){
+                 $code=$this->code_num('WalletEmpty');
+                 return $this->errors($code,__LINE__);
+             }
+             $wallet_addr=$info['data']['wallet_addr'];
+             $qr_msg=base64_encode($info['data']['wallet_addr']);
+         }else{
+             $Wallet_temp=current($Wallet['data']['list']);
+             $wallet_addr=$Wallet_temp['wallet_addr'];
+             $qr_msg=base64_encode($Wallet_temp['wallet_addr']);
+         }
+
+         $res['wallet_addr']=$wallet_addr;
+         $res['qr_msg']=$qr_msg;
          return $this->response($res, 200);
      }
 

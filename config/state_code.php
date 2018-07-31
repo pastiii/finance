@@ -66,5 +66,6 @@ return [
     'AmountError'          => 7009, //划转金额大于可用余额
     'ValidateError'        => 7010, //验证方式错误
     'WithdrawFailure'      => 7011, //提现操作失败
+    'WalletError'          => 7012, //获取充值地址失败
 ];
 
