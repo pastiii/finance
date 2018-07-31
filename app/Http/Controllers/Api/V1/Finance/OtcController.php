@@ -115,6 +115,18 @@ class OtcController extends CommonController
                     'frozen_capital'      => '0.0'
                 ];
                 array_push($info,$temp);
+                $temp=[
+                    'otc_finance_id'      => $value['otc_finance_id'],
+                    'coin_id'             => $value['coin_id'],
+                    'coin_name'           => $value['coin_name'],
+                    'coin_type'           => $value['coin_type'],
+                    'coin_image'          => '',
+                    'finance_available'   => 100*$k,//$value['finance_available_str'],
+                    'finance_amount'      => 200*$k,//$value['finance_amount_str'],
+                    'finance_amount_rmb'  => '0.0',
+                    'frozen_capital'      => '0.0'
+                ];
+                array_push($info,$temp);
             }
         }
         $res['list']= $info;
