@@ -74,8 +74,9 @@ class FinanceController extends CommonController
         //账号信息获取
         $email = $this->userService->getUserEmailById($this->user_id);
         $phone = $this->userService->getUserPhone($this->user_id);
+
         //统计总资产
-        $amount=$this->amount();
+       return $amount=$this->amount();
 
         if($amount['code'] != 200){
             return $this->errors($amount['code'], __LINE__);

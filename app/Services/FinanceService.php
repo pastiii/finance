@@ -218,7 +218,7 @@ class FinanceService
     */
     public function exchange()
     {
-        $url = "exchange";
+        $url = "common/exchange/exchange";
         return $this->send_request($url, 'get',[],$this->exchangeRateUrl);
     }
 
@@ -228,7 +228,7 @@ class FinanceService
      */
     public function coin()
     {
-        $url = "coin";
+        $url = "common/exchange/coin";
         return $this->send_request($url, 'get',[],$this->exchangeRateUrl);
     }
 
